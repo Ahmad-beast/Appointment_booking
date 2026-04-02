@@ -8,6 +8,8 @@ import Services from "./pages/Services";
 import Doctors from "./pages/Doctors";
 import Reviews from "./pages/Reviews";
 import BookAppointment from "./pages/BookAppointment";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
