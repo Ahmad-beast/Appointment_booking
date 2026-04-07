@@ -1,5 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 const testimonials = [
   {
@@ -30,34 +29,40 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-24 bg-secondary">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
-          <p className="text-accent font-medium text-sm uppercase tracking-widest mb-2">Testimonials</p>
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
+          <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Testimonials</p>
+          <h2 className="font-serif text-3xl md:text-4xl text-foreground">
             What Our Patients Say
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
           {testimonials.map((t) => (
-            <Card key={t.name} className="border-border/50 hover:border-accent/20 transition-all">
-              <CardContent className="p-8">
-                <div className="flex gap-1 mb-4">
+            <div key={t.name} className="bg-card rounded-2xl border border-border p-7 hover:shadow-md transition-all">
+              <Quote className="w-8 h-8 text-primary/20 mb-4" />
+              <p className="text-foreground/80 text-sm leading-relaxed mb-5">{t.review}</p>
+              <div className="flex items-center justify-between pt-5 border-t border-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-bold text-sm">{t.name.split(" ").map(n => n[0]).join("")}</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{t.name}</p>
+                    <p className="text-muted-foreground text-xs">{t.treatment}</p>
+                  </div>
+                </div>
+                <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < t.rating ? "text-accent fill-accent" : "text-muted-foreground"}`}
+                      className={`w-3.5 h-3.5 ${i < t.rating ? "text-amber-400 fill-amber-400" : "text-border"}`}
                     />
                   ))}
                 </div>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4 italic">"{t.review}"</p>
-                <div>
-                  <p className="font-semibold text-foreground text-sm">{t.name}</p>
-                  <p className="text-accent text-xs">{t.treatment}</p>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

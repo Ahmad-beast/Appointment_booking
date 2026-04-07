@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -12,30 +12,44 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-md border-b border-gold/20">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? "bg-background/95 backdrop-blur-lg shadow-sm border-b border-border" : "bg-transparent"
+    }`}>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-accent flex items-center justify-center">
-              <span className="text-accent-foreground font-serif font-bold text-sm md:text-lg">S</span>
+        <div className="flex items-center justify-between h-18 md:h-20">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-sans font-bold text-base md:text-lg">S</span>
             </div>
-            <span className="font-serif text-lg md:text-xl font-bold text-primary-foreground">
-              SmilePro <span className="text-accent">Dental</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="font-sans text-base md:text-lg font-bold leading-tight text-foreground">
+                SmilePro
+              </span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground leading-tight">
+                Dental Clinic
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-accent ${
-                  location.pathname === link.path ? "text-accent" : "text-primary-foreground/80"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  location.pathname === link.path
+                    ? "text-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {link.name}
@@ -43,48 +57,51 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA */}
-          <div className="hidden md:flex items-center gap-4">
-            <a href="tel:+1234567890" className="flex items-center gap-1 text-primary-foreground/80 text-sm">
-              <Phone className="w-4 h-4 text-accent" />
-              (123) 456-7890
+          <div className="hidden md:flex items-center gap-3">
+            <a href="tel:+1234567890" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Phone className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <span className="font-medium">(123) 456-7890</span>
             </a>
             <Link to="/book">
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold">
-                Book Now
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl gap-1.5 shadow-sm">
+                Book Now <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
 
-          {/* Mobile toggle */}
           <button
-            className="md:hidden text-primary-foreground"
+            className="md:hidden text-foreground p-2 rounded-lg hover:bg-muted transition-colors"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden pb-4 border-t border-gold/20 mt-2 pt-4 space-y-3">
+          <div className="md:hidden pb-4 pt-2 space-y-1 animate-fade-in">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`block py-2 text-sm font-medium transition-colors ${
-                  location.pathname === link.path ? "text-accent" : "text-primary-foreground/80"
+                className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === link.path
+                    ? "text-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {link.name}
               </Link>
             ))}
-            <Link to="/book" onClick={() => setIsOpen(false)}>
-              <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-semibold mt-2">
-                Book Appointment
-              </Button>
-            </Link>
+            <div className="pt-2 px-1">
+              <Link to="/book" onClick={() => setIsOpen(false)}>
+                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl">
+                  Book Appointment
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>
