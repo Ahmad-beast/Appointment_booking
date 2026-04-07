@@ -3,28 +3,29 @@ import { Phone, Mail, MapPin, Clock } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="bg-[hsl(215,25%,12%)] text-white">
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-                <span className="text-accent-foreground font-serif font-bold text-lg">S</span>
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-sans font-bold text-lg">S</span>
               </div>
-              <span className="font-serif text-xl font-bold">
-                SmilePro <span className="text-accent">Dental</span>
-              </span>
+              <div className="flex flex-col">
+                <span className="font-sans text-lg font-bold leading-tight">SmilePro</span>
+                <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/40 leading-tight">Dental Clinic</span>
+              </div>
             </div>
-            <p className="text-primary-foreground/60 text-sm leading-relaxed">
+            <p className="text-white/50 text-sm leading-relaxed">
               Premium dental care with state-of-the-art technology and a compassionate team dedicated to your perfect smile.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-serif text-lg font-semibold text-accent mb-4">Quick Links</h4>
-            <div className="space-y-2">
+            <h4 className="font-sans text-sm font-bold uppercase tracking-wider text-white/80 mb-5">Quick Links</h4>
+            <div className="space-y-2.5">
               {[
                 { name: "Home", path: "/" },
                 { name: "Services", path: "/services" },
@@ -35,7 +36,7 @@ const Footer = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="block text-sm text-primary-foreground/60 hover:text-accent transition-colors"
+                  className="block text-sm text-white/40 hover:text-primary transition-colors"
                 >
                   {link.name}
                 </Link>
@@ -45,56 +46,60 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-serif text-lg font-semibold text-accent mb-4">Contact Us</h4>
-            <div className="space-y-3">
+            <h4 className="font-sans text-sm font-bold uppercase tracking-wider text-white/80 mb-5">Contact Us</h4>
+            <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                <span className="text-sm text-primary-foreground/60">123 Dental Avenue, Medical District, City 10001</span>
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-sm text-white/40">123 Dental Avenue, Medical District, City 10001</span>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-accent shrink-0" />
-                <span className="text-sm text-primary-foreground/60">(123) 456-7890</span>
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                  <Phone className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-sm text-white/40">(123) 456-7890</span>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-accent shrink-0" />
-                <span className="text-sm text-primary-foreground/60">info@smileprodental.com</span>
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                  <Mail className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-sm text-white/40">info@smileprodental.com</span>
               </div>
             </div>
           </div>
 
           {/* Hours */}
           <div>
-            <h4 className="font-serif text-lg font-semibold text-accent mb-4">Working Hours</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-accent shrink-0" />
-                <div>
-                  <p className="text-sm text-primary-foreground/80">Mon - Fri</p>
-                  <p className="text-sm text-primary-foreground/60">9:00 AM - 7:00 PM</p>
+            <h4 className="font-sans text-sm font-bold uppercase tracking-wider text-white/80 mb-5">Working Hours</h4>
+            <div className="space-y-3">
+              {[
+                { day: "Monday - Friday", hours: "9:00 AM - 7:00 PM" },
+                { day: "Saturday", hours: "9:00 AM - 5:00 PM" },
+                { day: "Sunday", hours: "Closed" },
+              ].map((item) => (
+                <div key={item.day} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-white/60 font-medium">{item.day}</p>
+                    <p className="text-sm text-white/40">{item.hours}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-accent shrink-0" />
-                <div>
-                  <p className="text-sm text-primary-foreground/80">Saturday</p>
-                  <p className="text-sm text-primary-foreground/60">9:00 AM - 5:00 PM</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-accent shrink-0" />
-                <div>
-                  <p className="text-sm text-primary-foreground/80">Sunday</p>
-                  <p className="text-sm text-primary-foreground/60">Closed</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center">
-          <p className="text-sm text-primary-foreground/40">
+        <div className="border-t border-white/10 mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-white/30">
             © 2026 SmilePro Dental. All rights reserved.
           </p>
+          <div className="flex gap-6">
+            <span className="text-sm text-white/30 hover:text-white/50 cursor-pointer transition-colors">Privacy Policy</span>
+            <span className="text-sm text-white/30 hover:text-white/50 cursor-pointer transition-colors">Terms of Service</span>
+          </div>
         </div>
       </div>
     </footer>

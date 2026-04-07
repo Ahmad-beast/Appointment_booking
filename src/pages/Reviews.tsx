@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTASection from "@/components/CTASection";
-import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 const reviews = [
   { name: "Maria Johnson", treatment: "Teeth Whitening", rating: 5, review: "Absolutely amazing experience! My teeth have never looked this good. The staff was incredibly professional and made me feel comfortable throughout the entire process." },
@@ -23,47 +22,49 @@ const Reviews = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <section className="pt-28 pb-20 bg-primary">
+      <section className="pt-28 pb-16 bg-gradient-to-br from-[hsl(210,30%,12%)] via-[hsl(200,35%,16%)] to-[hsl(192,40%,20%)]">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-accent font-medium text-sm uppercase tracking-widest mb-2">Patient Reviews</p>
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary-foreground">
-            What Our <span className="text-accent">Patients</span> Say
+          <p className="font-semibold text-sm uppercase tracking-widest mb-3" style={{ color: 'hsl(192, 80%, 65%)' }}>Patient Reviews</p>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight" style={{ color: 'white' }}>
+            What Our Patients Say
           </h1>
 
-          {/* Rating Summary */}
-          <div className="mt-8 inline-flex flex-col items-center bg-primary-foreground/5 border border-primary-foreground/10 rounded-2xl px-10 py-6">
-            <p className="font-serif text-5xl font-bold text-accent">{overallRating}</p>
+          <div className="mt-8 inline-flex flex-col items-center bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-10 py-6">
+            <p className="font-sans text-5xl font-bold" style={{ color: 'hsl(45, 90%, 60%)' }}>{overallRating}</p>
             <div className="flex gap-1 mt-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-accent fill-accent" />
+                <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
               ))}
             </div>
-            <p className="text-primary-foreground/60 text-sm mt-2">Based on {reviews.length} reviews</p>
+            <p className="text-sm mt-2" style={{ color: 'hsl(210, 15%, 65%)' }}>Based on {reviews.length} reviews</p>
           </div>
         </div>
       </section>
 
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
             {reviews.map((r, idx) => (
-              <Card key={idx} className="border-border/50 hover:border-accent/20 transition-all">
-                <CardContent className="p-8">
-                  <div className="flex gap-1 mb-4">
+              <div key={idx} className="bg-card rounded-2xl border border-border p-7 hover:shadow-md hover:border-primary/20 transition-all">
+                <Quote className="w-8 h-8 text-primary/20 mb-4" />
+                <p className="text-foreground/80 text-sm leading-relaxed mb-5">{r.review}</p>
+                <div className="flex items-center justify-between pt-5 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary font-bold text-sm">{r.name.split(" ").map(n => n[0]).join("")}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">{r.name}</p>
+                      <p className="text-muted-foreground text-xs">{r.treatment}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${i < r.rating ? "text-accent fill-accent" : "text-muted-foreground"}`}
-                      />
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
                     ))}
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4 italic">"{r.review}"</p>
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{r.name}</p>
-                    <p className="text-accent text-xs">{r.treatment}</p>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
