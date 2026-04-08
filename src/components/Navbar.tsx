@@ -22,20 +22,20 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? "bg-background/95 backdrop-blur-lg shadow-sm border-b border-border" : "bg-transparent"
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      scrolled ? "bg-background/95 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border" : "bg-transparent"
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-18 md:h-20">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
               <span className="text-primary-foreground font-sans font-bold text-base md:text-lg">S</span>
             </div>
             <div className="flex flex-col">
               <span className="font-sans text-base md:text-lg font-bold leading-tight text-foreground">
                 SmilePro
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground leading-tight">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground leading-tight">
                 Dental Clinic
               </span>
             </div>
@@ -46,26 +46,29 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   location.pathname === link.path
-                    ? "text-primary bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {link.name}
+                {location.pathname === link.path && (
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full" />
+                )}
               </Link>
             ))}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <a href="tel:+1234567890" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <a href="tel:+1234567890" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-all duration-300 group">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
                 <Phone className="w-3.5 h-3.5 text-primary" />
               </div>
               <span className="font-medium">(123) 456-7890</span>
             </a>
             <Link to="/book">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl gap-1.5 shadow-sm">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl gap-1.5 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-300">
                 Book Now <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
