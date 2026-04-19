@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import {
   CalendarIcon, CheckCircle, Clock, User, Stethoscope,
@@ -59,7 +59,7 @@ const BookAppointment = () => {
   const [date, setDate] = useState<Date>();
 
   const fetchBookedSlots = async (selectedDate: Date, doctor: string) => {
-    if (!doctor) return;
+    if (!doctor || !selectedDate) return;
     const { data } = await supabase
       .from("appointments")
       .select("time_slot")
@@ -68,6 +68,23 @@ const BookAppointment = () => {
       .neq("status", "cancelled");
     setBookedSlots(data?.map((d: { time_slot: string }) => d.time_slot) || []);
   };
+
+  // Realtime: refresh booked slots whenever appointments change for the selected date+doctor
+  useEffect(() => {
+    if (!date || !form.doctor) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const channel = supabase
+      .channel(`appointments-${dateStr}-${form.doctor}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", filter: `date=eq.${dateStr}` },
+        () => fetchBookedSlots(date, form.doctor)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [date, form.doctor]);
 
   const handleDateSelect = (d: Date | undefined) => {
     setDate(d);
@@ -87,13 +104,37 @@ const BookAppointment = () => {
       return;
     }
     setLoading(true);
+
+    // Final server-side check to prevent double booking (race condition guard)
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { data: existing } = await supabase
+      .from("appointments")
+      .select("id")
+      .eq("doctor", form.doctor)
+      .eq("date", dateStr)
+      .eq("time_slot", form.time_slot)
+      .neq("status", "cancelled")
+      .maybeSingle();
+
+    if (existing) {
+      setLoading(false);
+      toast({
+        title: "Slot just got booked",
+        description: "Sorry, that time slot is no longer available. Please pick another.",
+        variant: "destructive",
+      });
+      setForm((prev) => ({ ...prev, time_slot: "" }));
+      await fetchBookedSlots(date, form.doctor);
+      return;
+    }
+
     const { error } = await supabase.from("appointments").insert({
       patient_name: form.patient_name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim() || null,
       service: form.service,
       doctor: form.doctor,
-      date: format(date, "yyyy-MM-dd"),
+      date: dateStr,
       time_slot: form.time_slot,
       status: "pending",
     });
@@ -331,14 +372,20 @@ const BookAppointment = () => {
                               const isSelected = form.time_slot === slot;
                               return (
                                 <button key={slot} type="button" disabled={isBooked} onClick={() => setForm({ ...form, time_slot: slot })}
+                                  aria-label={isBooked ? `${slot} already booked` : slot}
                                   className={cn(
-                                    "px-2 py-2.5 text-xs rounded-xl border transition-all font-medium",
-                                    isBooked && "bg-muted text-muted-foreground cursor-not-allowed line-through opacity-50",
+                                    "relative px-2 py-2.5 text-xs rounded-xl border transition-all font-medium overflow-hidden",
+                                    isBooked && "bg-muted text-muted-foreground cursor-not-allowed line-through opacity-60",
                                     isSelected && !isBooked && "bg-primary text-primary-foreground border-primary shadow-md scale-105",
                                     !isSelected && !isBooked && "border-border hover:border-primary hover:bg-primary-soft text-foreground hover:-translate-y-0.5"
                                   )}
                                 >
                                   {slot}
+                                  {isBooked && (
+                                    <span className="absolute top-0.5 right-0.5 text-[8px] font-bold uppercase tracking-wide bg-destructive/90 text-destructive-foreground px-1 py-0.5 rounded-sm no-underline">
+                                      Booked
+                                    </span>
+                                  )}
                                 </button>
                               );
                             })}
