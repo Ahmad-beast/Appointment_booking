@@ -372,14 +372,20 @@ const BookAppointment = () => {
                               const isSelected = form.time_slot === slot;
                               return (
                                 <button key={slot} type="button" disabled={isBooked} onClick={() => setForm({ ...form, time_slot: slot })}
+                                  aria-label={isBooked ? `${slot} already booked` : slot}
                                   className={cn(
-                                    "px-2 py-2.5 text-xs rounded-xl border transition-all font-medium",
-                                    isBooked && "bg-muted text-muted-foreground cursor-not-allowed line-through opacity-50",
+                                    "relative px-2 py-2.5 text-xs rounded-xl border transition-all font-medium overflow-hidden",
+                                    isBooked && "bg-muted text-muted-foreground cursor-not-allowed line-through opacity-60",
                                     isSelected && !isBooked && "bg-primary text-primary-foreground border-primary shadow-md scale-105",
                                     !isSelected && !isBooked && "border-border hover:border-primary hover:bg-primary-soft text-foreground hover:-translate-y-0.5"
                                   )}
                                 >
                                   {slot}
+                                  {isBooked && (
+                                    <span className="absolute top-0.5 right-0.5 text-[8px] font-bold uppercase tracking-wide bg-destructive/90 text-destructive-foreground px-1 py-0.5 rounded-sm no-underline">
+                                      Booked
+                                    </span>
+                                  )}
                                 </button>
                               );
                             })}
