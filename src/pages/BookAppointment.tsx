@@ -59,7 +59,7 @@ const BookAppointment = () => {
   const [date, setDate] = useState<Date>();
 
   const fetchBookedSlots = async (selectedDate: Date, doctor: string) => {
-    if (!doctor) return;
+    if (!doctor || !selectedDate) return;
     const { data } = await supabase
       .from("appointments")
       .select("time_slot")
@@ -68,6 +68,23 @@ const BookAppointment = () => {
       .neq("status", "cancelled");
     setBookedSlots(data?.map((d: { time_slot: string }) => d.time_slot) || []);
   };
+
+  // Realtime: refresh booked slots whenever appointments change for the selected date+doctor
+  useEffect(() => {
+    if (!date || !form.doctor) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const channel = supabase
+      .channel(`appointments-${dateStr}-${form.doctor}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", filter: `date=eq.${dateStr}` },
+        () => fetchBookedSlots(date, form.doctor)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [date, form.doctor]);
 
   const handleDateSelect = (d: Date | undefined) => {
     setDate(d);
@@ -87,13 +104,37 @@ const BookAppointment = () => {
       return;
     }
     setLoading(true);
+
+    // Final server-side check to prevent double booking (race condition guard)
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { data: existing } = await supabase
+      .from("appointments")
+      .select("id")
+      .eq("doctor", form.doctor)
+      .eq("date", dateStr)
+      .eq("time_slot", form.time_slot)
+      .neq("status", "cancelled")
+      .maybeSingle();
+
+    if (existing) {
+      setLoading(false);
+      toast({
+        title: "Slot just got booked",
+        description: "Sorry, that time slot is no longer available. Please pick another.",
+        variant: "destructive",
+      });
+      setForm((prev) => ({ ...prev, time_slot: "" }));
+      await fetchBookedSlots(date, form.doctor);
+      return;
+    }
+
     const { error } = await supabase.from("appointments").insert({
       patient_name: form.patient_name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim() || null,
       service: form.service,
       doctor: form.doctor,
-      date: format(date, "yyyy-MM-dd"),
+      date: dateStr,
       time_slot: form.time_slot,
       status: "pending",
     });
