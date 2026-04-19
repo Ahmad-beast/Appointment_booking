@@ -1,28 +1,31 @@
-import { Award, Heart, Clock, Microscope } from "lucide-react";
-import { useScrollAnimation, useStaggerAnimation } from "@/hooks/useScrollAnimation";
+import { Award, Heart, Clock, Microscope, ShieldCheck, Users } from "lucide-react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useEffect, useState } from "react";
+import patientImg from "@/assets/happy-patient.jpg";
 
 const reasons = [
-  { icon: Microscope, title: "Advanced Technology", desc: "State-of-the-art 3D imaging, laser dentistry, and CEREC same-day crowns.", color: "from-cyan-500/15 to-primary/15" },
-  { icon: Award, title: "Award-Winning Team", desc: "Recognized as a top dental clinic for 5 consecutive years running.", color: "from-amber-500/15 to-yellow-500/15" },
-  { icon: Heart, title: "Patient-First Approach", desc: "Gentle, compassionate care personalized to your comfort and needs.", color: "from-rose-500/15 to-pink-500/15" },
-  { icon: Clock, title: "Flexible Scheduling", desc: "Same-day appointments, evening hours, and minimal wait times.", color: "from-emerald-500/15 to-green-500/15" },
+  { icon: Microscope, title: "Advanced Technology", desc: "3D imaging, laser dentistry, and same-day crowns." },
+  { icon: Award, title: "Award-Winning Team", desc: "Top-rated dental clinic 5 years running." },
+  { icon: Heart, title: "Gentle, Caring Approach", desc: "Personalized care focused on your comfort." },
+  { icon: Clock, title: "Flexible Scheduling", desc: "Same-day appointments and evening hours." },
+  { icon: ShieldCheck, title: "Insurance Friendly", desc: "We work with all major insurance providers." },
+  { icon: Users, title: "Family Dentistry", desc: "Care for every age, from toddlers to grandparents." },
 ];
 
 const stats = [
-  { value: 15, suffix: "+", label: "Years of Excellence" },
+  { value: 15, suffix: "+", label: "Years Experience" },
   { value: 10000, suffix: "+", label: "Happy Patients" },
   { value: 25, suffix: "+", label: "Expert Dentists" },
-  { value: 99, suffix: "%", label: "Patient Satisfaction" },
+  { value: 99, suffix: "%", label: "Satisfaction Rate" },
 ];
 
 const AnimatedCounter = ({ value, suffix, isVisible }: { value: number; suffix: string; isVisible: boolean }) => {
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     if (!isVisible) return;
-    const duration = 2000;
-    const steps = 60;
+    const duration = 1800;
+    const steps = 50;
     const increment = value / steps;
     let current = 0;
     const timer = setInterval(() => {
@@ -37,63 +40,86 @@ const AnimatedCounter = ({ value, suffix, isVisible }: { value: number; suffix: 
     return () => clearInterval(timer);
   }, [isVisible, value]);
 
-  return <span>{isVisible ? count.toLocaleString() : 0}{suffix}</span>;
+  return (
+    <span>
+      {isVisible ? count.toLocaleString() : 0}
+      {suffix}
+    </span>
+  );
 };
 
 const WhyChooseUs = () => {
-  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: cardsRef, isVisible: cardsVisible } = useStaggerAnimation(4);
+  const { ref: leftRef, isVisible: leftVisible } = useScrollAnimation();
+  const { ref: rightRef, isVisible: rightVisible } = useScrollAnimation();
   const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
 
   return (
-    <section className="py-28 bg-secondary relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/3 blur-[150px]" />
-      
+    <section className="py-20 md:py-28 bg-secondary relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <div ref={headerRef} className={`text-center mb-16 ${headerVisible ? 'scroll-visible' : 'scroll-hidden'}`}>
-          <p className="text-primary font-bold text-sm uppercase tracking-[0.2em] mb-3 flex items-center justify-center gap-2">
-            <span className="w-8 h-[2px] bg-primary rounded-full" />
-            Why SmilePro
-            <span className="w-8 h-[2px] bg-primary rounded-full" />
-          </p>
-          <h2 className="font-serif text-3xl md:text-5xl text-foreground">
-            Why Patients Choose Us
-          </h2>
-          <p className="text-muted-foreground mt-5 max-w-2xl mx-auto text-lg leading-relaxed">
-            We combine clinical excellence with genuine care to deliver an experience that exceeds expectations.
-          </p>
-        </div>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-16 md:mb-20">
+          {/* Left: Image */}
+          <div ref={leftRef} className={`relative reveal-left ${leftVisible ? "in-view" : ""}`}>
+            <div className="relative aspect-[4/5] max-w-md mx-auto lg:mx-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 animate-blob" />
+              <div className="relative h-full w-full rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/15">
+                <img
+                  src={patientImg}
+                  alt="Happy patient with bright smile"
+                  className="w-full h-full object-cover"
+                  width={768}
+                  height={1024}
+                  loading="lazy"
+                />
+              </div>
 
-        <div 
-          ref={cardsRef}
-          className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20 stagger-children ${cardsVisible ? 'stagger-visible' : ''}`}
-        >
-          {reasons.map((r) => (
-            <div key={r.title} className="bg-card rounded-2xl p-8 border border-border card-hover group relative overflow-hidden">
-              <div className={`absolute inset-0 bg-gradient-to-br ${r.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              <div className="relative z-10">
-                <div className="w-14 h-14 mb-6 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-500">
-                  <r.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-serif text-lg text-foreground mb-2">{r.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{r.desc}</p>
+              {/* Floating stat */}
+              <div className="absolute -bottom-6 -right-4 sm:-right-8 glass rounded-2xl p-5 shadow-xl border border-white/40 animate-float">
+                <p className="text-3xl font-serif font-bold text-primary">98%</p>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">Patients return<br />within 6 months</p>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Right: Content */}
+          <div ref={rightRef} className={`reveal-right ${rightVisible ? "in-view" : ""}`}>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4">
+              Why Choose Us
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground leading-tight mb-5 text-balance">
+              Premium care that puts you first
+            </h2>
+            <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-8 text-pretty">
+              We combine clinical excellence with genuine warmth — because going to the dentist should never feel intimidating.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {reasons.map((r) => (
+                <div key={r.title} className="flex gap-3 group">
+                  <div className="shrink-0 w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
+                    <r.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-sm mb-0.5">{r.title}</h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed">{r.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Enhanced Stats bar */}
-        <div 
+        {/* Stats */}
+        <div
           ref={statsRef}
-          className={`bg-gradient-to-r from-[hsl(210,30%,12%)] via-[hsl(205,35%,15%)] to-[hsl(192,40%,18%)] rounded-3xl p-10 md:p-14 shadow-2xl ${statsVisible ? 'scroll-visible-scale' : 'scroll-hidden-scale'}`}
+          className={`bg-card border border-border rounded-3xl p-8 md:p-12 shadow-lg reveal-scale ${statsVisible ? "in-view" : ""}`}
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
-              <div key={stat.label} className="text-center group">
-                <p className="font-sans text-4xl md:text-5xl font-extrabold tracking-tight shimmer-text">
+              <div key={stat.label} className="text-center">
+                <p className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-2">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} isVisible={statsVisible} />
                 </p>
-                <p className="text-sm mt-2 font-medium" style={{ color: 'hsl(210, 15%, 60%)' }}>{stat.label}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
