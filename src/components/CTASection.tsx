@@ -41,15 +41,15 @@ const CTASection = () => {
               Join thousands of happy patients. Book your appointment in less than 60 seconds.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link to="/book" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-base bg-white text-primary hover:bg-white/95 hover:-translate-y-0.5 shadow-xl transition-all duration-300 gap-2">
-                  Book Free Consultation <ArrowRight className="w-4 h-4" />
+                <Button size="lg" className="w-full sm:w-auto h-14 px-10 rounded-full font-bold text-base sm:text-lg bg-white text-primary hover:bg-white/95 hover:-translate-y-0.5 shadow-xl transition-all duration-300 gap-2">
+                  Book Free Consultation <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
               <a href="tel:+1234567890" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-base bg-transparent border-2 border-white/40 text-white hover:bg-white/10 hover:border-white transition-all duration-300 gap-2">
-                  <Phone className="w-4 h-4" /> Call Now
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-full font-bold text-base sm:text-lg bg-transparent border-2 border-white/40 text-white hover:bg-white/10 hover:border-white transition-all duration-300 gap-2">
+                  <Phone className="w-5 h-5" /> Call Now
                 </Button>
               </a>
             </div>
