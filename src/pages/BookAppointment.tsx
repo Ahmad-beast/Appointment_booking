@@ -153,12 +153,11 @@ const BookAppointment = () => {
               <p className="text-muted-foreground mb-6">Thank you, <span className="font-semibold text-foreground">{form.patient_name}</span>. Your appointment is booked.</p>
               <div className="bg-secondary/60 rounded-2xl p-5 text-sm text-left space-y-3 border border-border">
                 <div className="flex items-center gap-3"><Stethoscope className="w-4 h-4 text-primary shrink-0" /><span className="text-foreground"><strong>Service:</strong> {form.service}</span></div>
-                <div className="flex items-center gap-3"><User className="w-4 h-4 text-primary shrink-0" /><span className="text-foreground"><strong>Doctor:</strong> {form.doctor}</span></div>
                 <div className="flex items-center gap-3"><CalendarIcon className="w-4 h-4 text-primary shrink-0" /><span className="text-foreground"><strong>Date:</strong> {date && format(date, "PPP")}</span></div>
                 <div className="flex items-center gap-3"><Clock className="w-4 h-4 text-primary shrink-0" /><span className="text-foreground"><strong>Time:</strong> {form.time_slot}</span></div>
               </div>
               <p className="text-muted-foreground text-xs mt-5">📞 We'll call you shortly to confirm your appointment.</p>
-              <Button className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 h-11" onClick={() => { setSuccess(false); setForm({ patient_name: "", phone: "", email: "", service: "", doctor: "", time_slot: "" }); setDate(undefined); }}>
+              <Button className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 h-11" onClick={() => { setSuccess(false); setForm({ patient_name: "", phone: "", email: "", service: "", doctor: DEFAULT_DOCTOR, time_slot: "" }); setDate(undefined); }}>
                 Book Another Appointment
               </Button>
             </div>
@@ -300,27 +299,19 @@ const BookAppointment = () => {
 
                     <div className="h-px bg-border" />
 
-                    {/* Service & Doctor */}
+                    {/* Service */}
                     <div>
                       <div className="flex items-center gap-2 mb-4">
                         <Stethoscope className="w-4 h-4 text-primary" />
-                        <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">Service & Doctor</h3>
+                        <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">Service</h3>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold">Service *</Label>
-                          <Select value={form.service} onValueChange={(v) => setForm({ ...form, service: v })}>
-                            <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select service" /></SelectTrigger>
-                            <SelectContent>{services.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold">Doctor *</Label>
-                          <Select value={form.doctor} onValueChange={handleDoctorChange}>
-                            <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select doctor" /></SelectTrigger>
-                            <SelectContent>{doctors.map((d) => (<SelectItem key={d} value={d}>{d}</SelectItem>))}</SelectContent>
-                          </Select>
-                        </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">Service *</Label>
+                        <Select value={form.service} onValueChange={(v) => setForm({ ...form, service: v })}>
+                          <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select service" /></SelectTrigger>
+                          <SelectContent>{services.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground pt-1">Our team will assign the best available specialist for you.</p>
                       </div>
                     </div>
 
@@ -347,7 +338,7 @@ const BookAppointment = () => {
                         </Popover>
                       </div>
 
-                      {date && form.doctor && (
+                      {date && (
                         <div className="space-y-3 mt-5 animate-fade-in">
                           <div className="flex items-center justify-between">
                             <Label className="text-sm font-semibold">Available Time Slots *</Label>
@@ -383,9 +374,9 @@ const BookAppointment = () => {
                         </div>
                       )}
 
-                      {(!date || !form.doctor) && (
+                      {!date && (
                         <div className="mt-4 p-4 rounded-xl bg-secondary/60 border border-border text-center text-sm text-muted-foreground">
-                          👆 Select a doctor and date to see available time slots
+                          👆 Select a date to see available time slots
                         </div>
                       )}
                     </div>
