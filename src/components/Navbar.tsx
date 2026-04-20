@@ -14,6 +14,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -26,10 +27,13 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Solid background on inner pages (for contrast); transparent only on home top
+  const showSolid = scrolled || !isHome || isOpen;
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "glass shadow-sm border-b border-border/60" : "bg-transparent"
+        showSolid ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border/60" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4">

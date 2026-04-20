@@ -1,16 +1,32 @@
-import { Star, Quote } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Star, Quote, Send } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
-const testimonials = [
-  { name: "Maria Johnson", treatment: "Teeth Whitening", rating: 5, review: "Absolutely amazing experience! My teeth have never looked this good. The staff was incredibly professional and made me feel comfortable throughout the entire process." },
-  { name: "Robert Smith", treatment: "Dental Implants", rating: 5, review: "Dr. Wilson did an incredible job with my implants. The process was smooth, painless, and the results are phenomenal. Highly recommend SmilePro!" },
-  { name: "Lisa Anderson", treatment: "Invisalign", rating: 5, review: "Best dental clinic I've ever been to. The entire team is so caring and attentive. My Invisalign journey has been much easier than expected." },
-  { name: "David Park", treatment: "Root Canal", rating: 5, review: "I was terrified of getting a root canal but the team made it completely painless. Modern equipment and very gentle doctors. Truly exceptional care." },
-];
+type Review = { id: string; patient_name: string; rating: number; comment: string };
 
 const TestimonialsSection = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation();
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("id,patient_name,rating,comment")
+        .eq("approved", true)
+        .order("created_at", { ascending: false })
+        .limit(4);
+      setReviews((data as Review[]) || []);
+    })();
+  }, []);
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
+    : "5.0";
 
   return (
     <section className="py-20 md:py-28 bg-secondary relative overflow-hidden">
@@ -28,38 +44,62 @@ const TestimonialsSection = () => {
                 <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span className="text-foreground font-bold">4.9</span>
-            <span className="text-muted-foreground text-sm">from 2,400+ Google reviews</span>
+            <span className="text-foreground font-bold">{avgRating}</span>
+            <span className="text-muted-foreground text-sm">
+              from {reviews.length} verified review{reviews.length !== 1 ? "s" : ""}
+            </span>
           </div>
         </div>
 
-        <div ref={gridRef} className={`grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 max-w-5xl mx-auto stagger ${gridVisible ? "in-view" : ""}`}>
-          {testimonials.map((t) => (
-            <div key={t.name} className="bg-card rounded-3xl border border-border p-6 md:p-8 card-lift relative overflow-hidden">
-              <Quote className="absolute top-5 right-5 w-12 h-12 text-primary/10" strokeWidth={1.5} />
+        {reviews.length === 0 ? (
+          <div className="max-w-xl mx-auto text-center bg-card border border-border rounded-3xl p-10">
+            <Quote className="w-10 h-10 text-primary/30 mx-auto mb-4" />
+            <p className="text-foreground/80 mb-6">No reviews yet. Be the first to share your experience!</p>
+            <Link to="/reviews">
+              <Button className="rounded-full h-12 px-8 font-bold gap-2">
+                <Send className="w-4 h-4" /> Write a Review
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div ref={gridRef} className={`grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 max-w-5xl mx-auto stagger ${gridVisible ? "in-view" : ""}`}>
+              {reviews.map((t) => (
+                <div key={t.id} className="bg-card rounded-3xl border border-border p-6 md:p-8 card-lift relative overflow-hidden">
+                  <Quote className="absolute top-5 right-5 w-12 h-12 text-primary/10" strokeWidth={1.5} />
 
-              <div className="relative">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < t.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
-                  ))}
-                </div>
+                  <div className="relative">
+                    <div className="flex gap-0.5 mb-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < t.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
+                      ))}
+                    </div>
 
-                <p className="text-foreground/85 leading-relaxed mb-6 text-pretty">"{t.review}"</p>
+                    <p className="text-foreground/85 leading-relaxed mb-6 text-pretty line-clamp-5">"{t.comment}"</p>
 
-                <div className="flex items-center gap-3 pt-5 border-t border-border">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center font-bold text-primary text-sm">
-                    {t.name.split(" ").map((n) => n[0]).join("")}
+                    <div className="flex items-center gap-3 pt-5 border-t border-border">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center font-bold text-primary text-sm">
+                        {t.patient_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">{t.patient_name}</p>
+                        <p className="text-muted-foreground text-xs">Verified Patient</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{t.name}</p>
-                    <p className="text-muted-foreground text-xs">{t.treatment}</p>
-                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+
+            <div className="text-center mt-10">
+              <Link to="/reviews">
+                <Button variant="outline" className="rounded-full h-12 px-8 font-bold border-2">
+                  Read All Reviews & Share Yours
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
