@@ -80,13 +80,15 @@ const BookAppointment = () => {
       const [{ data: srv }, { data: settings }, { data: hols }] = await Promise.all([
         supabase.from("services").select("id,name,price,duration_minutes").eq("active", true).order("sort_order"),
         supabase.from("clinic_settings").select("opening_time,closing_time,slot_duration_minutes").maybeSingle(),
-        supabase.from("holidays").select("date").gte("date", format(new Date(), "yyyy-MM-dd")),
+        supabase.from("holidays").select("date,reason").gte("date", format(new Date(), "yyyy-MM-dd")).order("date"),
       ]);
       setServices((srv as ServiceOption[]) || []);
       if (settings) {
         setTimeSlots(generateSlots(settings.opening_time, settings.closing_time, settings.slot_duration_minutes));
       }
-      setHolidayDates(new Set((hols || []).map((h: { date: string }) => h.date)));
+      const m = new Map<string, string>();
+      (hols || []).forEach((h: { date: string; reason: string | null }) => m.set(h.date, h.reason || "Closed"));
+      setHolidayMap(m);
     })();
   }, []);
 
