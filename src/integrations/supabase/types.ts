@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      clinic_settings: {
+        Row: {
+          address: string | null
+          clinic_name: string
+          closing_time: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          opening_time: string
+          phone: string | null
+          slot_duration_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          clinic_name?: string
+          closing_time?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          opening_time?: string
+          phone?: string | null
+          slot_duration_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          clinic_name?: string
+          closing_time?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          opening_time?: string
+          phone?: string | null
+          slot_duration_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       doctors: {
         Row: {
           bio: string | null
@@ -86,6 +125,54 @@ export type Database = {
           qualifications?: string
           specialization?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      holidays: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          approved: boolean
+          comment: string
+          created_at: string
+          id: string
+          patient_name: string
+          rating: number
+        }
+        Insert: {
+          approved?: boolean
+          comment: string
+          created_at?: string
+          id?: string
+          patient_name: string
+          rating: number
+        }
+        Update: {
+          approved?: boolean
+          comment?: string
+          created_at?: string
+          id?: string
+          patient_name?: string
+          rating?: number
         }
         Relationships: []
       }
