@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle, UserSquare, Briefcase } from "lucide-react";
 import AdminAppointments from "@/components/admin/AdminAppointments";
 import AdminDoctors from "@/components/admin/AdminDoctors";
+import AdminPatients from "@/components/admin/AdminPatients";
+import AdminServices from "@/components/admin/AdminServices";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { cn } from "@/lib/utils";
 
-type View = "overview" | "appointments" | "doctors";
+type View = "overview" | "appointments" | "patients" | "doctors" | "services";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -77,7 +80,9 @@ const AdminDashboard = () => {
   const navItems: { key: View; label: string; icon: typeof LayoutDashboard }[] = [
     { key: "overview", label: "Overview", icon: LayoutDashboard },
     { key: "appointments", label: "Appointments", icon: CalendarDays },
+    { key: "patients", label: "Patients", icon: UserSquare },
     { key: "doctors", label: "Doctors", icon: Users },
+    { key: "services", label: "Services", icon: Briefcase },
   ];
 
   return (
@@ -144,7 +149,7 @@ const AdminDashboard = () => {
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
-          <div className="flex border-t border-primary-foreground/10">
+          <div className="flex border-t border-primary-foreground/10 overflow-x-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = view === item.key;
@@ -153,11 +158,11 @@ const AdminDashboard = () => {
                   key={item.key}
                   onClick={() => setView(item.key)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition-colors",
+                    "flex-1 min-w-[80px] flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium border-b-2 transition-colors",
                     active ? "border-accent text-accent" : "border-transparent text-primary-foreground/70"
                   )}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   {item.label}
                 </button>
               );
@@ -180,13 +185,15 @@ const AdminDashboard = () => {
                 <StatCard label="Cancelled" value={stats.cancelled} icon={XCircle} tone="destructive" />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <AdminAnalytics />
+
+              <div className="grid md:grid-cols-3 gap-4">
                 <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setView("appointments")}>
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Manage</p>
                       <h3 className="font-serif text-xl font-bold mt-1">Appointments</h3>
-                      <p className="text-sm text-muted-foreground mt-2">Confirm, complete or cancel patient bookings.</p>
+                      <p className="text-sm text-muted-foreground mt-2">Search, filter and manage bookings.</p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                       <CalendarDays className="w-6 h-6 text-primary" />
@@ -194,15 +201,28 @@ const AdminDashboard = () => {
                   </div>
                 </Card>
 
-                <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setView("doctors")}>
+                <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setView("patients")}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Manage</p>
-                      <h3 className="font-serif text-xl font-bold mt-1">Doctors ({stats.doctors})</h3>
-                      <p className="text-sm text-muted-foreground mt-2">Add, edit or remove doctors. Changes appear on the website instantly.</p>
+                      <p className="text-sm text-muted-foreground">View</p>
+                      <h3 className="font-serif text-xl font-bold mt-1">Patients</h3>
+                      <p className="text-sm text-muted-foreground mt-2">Full visit history per patient.</p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-accent-foreground" />
+                      <UserSquare className="w-6 h-6 text-accent-foreground" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setView("services")}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Configure</p>
+                      <h3 className="font-serif text-xl font-bold mt-1">Services</h3>
+                      <p className="text-sm text-muted-foreground mt-2">Edit names, prices and durations.</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Briefcase className="w-6 h-6 text-primary" />
                     </div>
                   </div>
                 </Card>
@@ -214,9 +234,19 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               <div>
                 <h1 className="font-serif text-3xl font-bold text-foreground">Appointments</h1>
-                <p className="text-muted-foreground mt-1">Manage all patient bookings.</p>
+                <p className="text-muted-foreground mt-1">Search, filter and manage all patient bookings.</p>
               </div>
               <AdminAppointments />
+            </div>
+          )}
+
+          {view === "patients" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Patients</h1>
+                <p className="text-muted-foreground mt-1">Auto-built from your appointments. Search and view full history.</p>
+              </div>
+              <AdminPatients />
             </div>
           )}
 
@@ -227,6 +257,16 @@ const AdminDashboard = () => {
                 <p className="text-muted-foreground mt-1">Edits sync to the public website automatically.</p>
               </div>
               <AdminDoctors />
+            </div>
+          )}
+
+          {view === "services" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Services</h1>
+                <p className="text-muted-foreground mt-1">Manage offerings, prices and durations. Used by the booking form and invoices.</p>
+              </div>
+              <AdminServices />
             </div>
           )}
         </div>

@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, RefreshCw, FileDown, Send, Copy, Phone, Calendar as CalIcon, Clock, User } from "lucide-react";
+import { Trash2, RefreshCw, FileDown, Send, Copy, Phone, Calendar as CalIcon, Clock, User, Search, X } from "lucide-react";
 import { format, isToday, isTomorrow, isYesterday, parseISO, isPast, isThisWeek } from "date-fns";
 import { jsPDF } from "jspdf";
 
@@ -45,18 +46,33 @@ const AdminAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("services").select("name,price");
+      const map: Record<string, number> = {};
+      (data || []).forEach((s: { name: string; price: number }) => { map[s.name] = Number(s.price); });
+      setServicePrices(map);
+    })();
+  }, []);
 
   const fetchAppointments = async () => {
     setLoading(true);
     let query = supabase.from("appointments").select("*").order("date", { ascending: true }).order("time_slot", { ascending: true });
     if (filter !== "all") query = query.eq("status", filter);
+    if (dateFrom) query = query.gte("date", dateFrom);
+    if (dateTo) query = query.lte("date", dateTo);
     const { data, error } = await query;
     if (error) toast({ title: "Error loading appointments", variant: "destructive" });
     setAppointments((data as Appointment[]) || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAppointments(); }, [filter]);
+  useEffect(() => { fetchAppointments(); }, [filter, dateFrom, dateTo]);
 
   const copyPhone = async (phone: string) => {
     try {
@@ -67,7 +83,21 @@ const AdminAppointments = () => {
     }
   };
 
-  const grouped = appointments.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
+  const clearFilters = () => { setFilter("all"); setSearch(""); setDateFrom(""); setDateTo(""); };
+  const hasFilters = filter !== "all" || !!search || !!dateFrom || !!dateTo;
+
+  const searchFiltered = appointments.filter((a) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      a.patient_name.toLowerCase().includes(q) ||
+      a.phone.toLowerCase().includes(q) ||
+      a.service.toLowerCase().includes(q) ||
+      (a.email || "").toLowerCase().includes(q)
+    );
+  });
+
+  const grouped = searchFiltered.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
     const { label, order } = groupLabel(apt.date);
     if (!acc[label]) acc[label] = { order, items: [] };
     acc[label].items.push(apt);
@@ -152,13 +182,15 @@ const AdminAppointments = () => {
     doc.text("DETAIL", 56, startY + 21);
     doc.text("INFORMATION", 280, startY + 21);
 
+    const price = servicePrices[apt.service];
     const rows: [string, string][] = [
       ["Service", apt.service],
-      ["Doctor", apt.doctor],
       ["Date", apt.date],
       ["Time", apt.time_slot],
       ["Status", apt.status.toUpperCase()],
     ];
+    if (price !== undefined) rows.splice(1, 0, ["Price", `$${price.toFixed(2)}`]);
+
     doc.setTextColor(40, 40, 40);
     rows.forEach((r, i) => {
       const y = startY + 32 + i * 32;
@@ -171,6 +203,18 @@ const AdminAppointments = () => {
       doc.setFont("helvetica", "normal");
       doc.text(r[1], 280, y + 21);
     });
+
+    if (price !== undefined) {
+      const totalY = startY + 32 + rows.length * 32 + 16;
+      doc.setFillColor(13, 110, 120);
+      doc.roundedRect(40, totalY, pageW - 80, 44, 6, 6, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("TOTAL DUE", 56, totalY + 28);
+      doc.setFontSize(16);
+      doc.text(`$${price.toFixed(2)}`, pageW - 56, totalY + 28, { align: "right" });
+    }
 
     doc.setDrawColor(220, 220, 220);
     doc.line(40, 720, pageW - 40, 720);
@@ -209,31 +253,49 @@ const AdminAppointments = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-serif text-xl">Appointments ({appointments.length})</CardTitle>
-        <div className="flex items-center gap-2">
+      <CardHeader className="space-y-4">
+        <div className="flex flex-row items-center justify-between gap-2">
+          <CardTitle className="font-serif text-xl">
+            Appointments <span className="text-muted-foreground font-normal text-base">({searchFiltered.length}{searchFiltered.length !== appointments.length ? ` of ${appointments.length}` : ""})</span>
+          </CardTitle>
+          <Button variant="outline" size="icon" onClick={fetchAppointments} title="Refresh">
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex flex-col md:flex-row md:items-center gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Search by name, phone, service or email..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full md:w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={fetchAppointments}>
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full md:w-[150px]" title="From date" />
+            <span className="text-muted-foreground text-sm">→</span>
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full md:w-[150px]" title="To date" />
+          </div>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="shrink-0">
+              <X className="w-3.5 h-3.5 mr-1" />Clear
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
           <p className="text-muted-foreground text-center py-8">Loading...</p>
-        ) : appointments.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No appointments found.</p>
+        ) : searchFiltered.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No appointments match your filters.</p>
         ) : (
           <div className="space-y-8">
             {groupedSorted.map(([label, group]) => (
@@ -250,7 +312,7 @@ const AdminAppointments = () => {
                         <TableHead><User className="w-3.5 h-3.5 inline mr-1" />Patient</TableHead>
                         <TableHead><Phone className="w-3.5 h-3.5 inline mr-1" />Phone</TableHead>
                         <TableHead>Service</TableHead>
-                        <TableHead>Doctor</TableHead>
+                        <TableHead>Price</TableHead>
                         <TableHead><CalIcon className="w-3.5 h-3.5 inline mr-1" />Date</TableHead>
                         <TableHead><Clock className="w-3.5 h-3.5 inline mr-1" />Time</TableHead>
                         <TableHead>Status</TableHead>
@@ -270,7 +332,7 @@ const AdminAppointments = () => {
                             </div>
                           </TableCell>
                           <TableCell>{apt.service}</TableCell>
-                          <TableCell>{apt.doctor}</TableCell>
+                          <TableCell className="whitespace-nowrap font-medium">{servicePrices[apt.service] !== undefined ? `$${servicePrices[apt.service].toFixed(0)}` : "—"}</TableCell>
                           <TableCell className="whitespace-nowrap">{format(parseISO(apt.date), "MMM d, yyyy")}</TableCell>
                           <TableCell className="whitespace-nowrap">{apt.time_slot}</TableCell>
                           <TableCell>
