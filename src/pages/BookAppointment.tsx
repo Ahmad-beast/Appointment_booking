@@ -362,6 +362,17 @@ const BookAppointment = () => {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold">Preferred Date *</Label>
+                        {holidayMap.size > 0 && (
+                          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs space-y-1 mb-2">
+                            <div className="font-bold text-destructive uppercase tracking-wide text-[10px]">Upcoming Closed Days</div>
+                            {Array.from(holidayMap.entries()).slice(0, 5).map(([d, reason]) => (
+                              <div key={d} className="flex justify-between gap-3 text-foreground">
+                                <span className="font-semibold">{format(new Date(d + "T00:00:00"), "EEE, MMM d")}</span>
+                                <span className="text-muted-foreground truncate">{reason}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl h-11", !date && "text-muted-foreground")}>
