@@ -6,9 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, RefreshCw, FileDown, Send } from "lucide-react";
-import { format } from "date-fns";
+import { Trash2, RefreshCw, FileDown, Send, Copy, Phone, Calendar as CalIcon, Clock, User } from "lucide-react";
+import { format, isToday, isTomorrow, isYesterday, parseISO, isPast, isThisWeek } from "date-fns";
 import { jsPDF } from "jspdf";
+
+const groupLabel = (dateStr: string) => {
+  const d = parseISO(dateStr);
+  if (isToday(d)) return { label: "Today", order: 1 };
+  if (isTomorrow(d)) return { label: "Tomorrow", order: 0 };
+  if (isYesterday(d)) return { label: "Yesterday", order: 2 };
+  if (!isPast(d) && isThisWeek(d)) return { label: "This Week", order: 3 };
+  if (isPast(d)) return { label: "Past", order: 5 };
+  return { label: "Upcoming", order: 4 };
+};
 
 type Appointment = {
   id: string;
