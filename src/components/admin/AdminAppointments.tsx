@@ -46,18 +46,23 @@ const AdminAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const fetchAppointments = async () => {
     setLoading(true);
     let query = supabase.from("appointments").select("*").order("date", { ascending: true }).order("time_slot", { ascending: true });
     if (filter !== "all") query = query.eq("status", filter);
+    if (dateFrom) query = query.gte("date", dateFrom);
+    if (dateTo) query = query.lte("date", dateTo);
     const { data, error } = await query;
     if (error) toast({ title: "Error loading appointments", variant: "destructive" });
     setAppointments((data as Appointment[]) || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAppointments(); }, [filter]);
+  useEffect(() => { fetchAppointments(); }, [filter, dateFrom, dateTo]);
 
   const copyPhone = async (phone: string) => {
     try {
@@ -68,7 +73,21 @@ const AdminAppointments = () => {
     }
   };
 
-  const grouped = appointments.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
+  const clearFilters = () => { setFilter("all"); setSearch(""); setDateFrom(""); setDateTo(""); };
+  const hasFilters = filter !== "all" || !!search || !!dateFrom || !!dateTo;
+
+  const searchFiltered = appointments.filter((a) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      a.patient_name.toLowerCase().includes(q) ||
+      a.phone.toLowerCase().includes(q) ||
+      a.service.toLowerCase().includes(q) ||
+      (a.email || "").toLowerCase().includes(q)
+    );
+  });
+
+  const grouped = searchFiltered.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
     const { label, order } = groupLabel(apt.date);
     if (!acc[label]) acc[label] = { order, items: [] };
     acc[label].items.push(apt);
