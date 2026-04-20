@@ -44,12 +44,24 @@ const BookAppointment = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [services, setServices] = useState<ServiceOption[]>([]);
 
   const [form, setForm] = useState({
     patient_name: "", phone: "", email: "",
     service: "", doctor: DEFAULT_DOCTOR, time_slot: "",
   });
   const [date, setDate] = useState<Date>();
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("services")
+        .select("id,name,price,duration_minutes")
+        .eq("active", true)
+        .order("sort_order");
+      setServices((data as ServiceOption[]) || []);
+    })();
+  }, []);
 
   const fetchBookedSlots = async (selectedDate: Date) => {
     if (!selectedDate) return;
