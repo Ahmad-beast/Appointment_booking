@@ -58,24 +58,20 @@ const Services = () => {
             className={`grid grid-cols-1 md:grid-cols-2 gap-6 stagger-children ${gridVisible ? 'stagger-visible' : ''}`}
           >
             {services.map((service) => (
-              <div key={service.title} className="rounded-2xl border border-border bg-card card-hover group p-8 relative overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <div key={service.id} className="rounded-2xl border border-border bg-card card-hover group p-8 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 flex items-start gap-5">
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-500">
-                    <service.icon className="w-6 h-6 text-primary" />
+                    <Sparkles className="w-6 h-6 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <h3 className="font-serif text-xl text-foreground group-hover:text-primary transition-colors duration-300">{service.title}</h3>
-                      <span className="text-primary font-bold text-sm whitespace-nowrap bg-primary/10 px-4 py-1.5 rounded-full">{service.price}</span>
+                      <h3 className="font-serif text-xl text-foreground group-hover:text-primary transition-colors duration-300">{service.name}</h3>
+                      <span className="text-primary font-bold text-sm whitespace-nowrap bg-primary/10 px-4 py-1.5 rounded-full">${Number(service.price).toFixed(0)}</span>
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed mb-4">{service.desc}</p>
+                    {service.description && <p className="text-muted-foreground text-sm leading-relaxed mb-4">{service.description}</p>}
                     <div className="flex flex-wrap gap-2">
-                      {service.benefits.map((b) => (
-                        <span key={b} className="text-xs bg-secondary text-muted-foreground px-3 py-1.5 rounded-full font-medium">
-                          ✓ {b}
-                        </span>
-                      ))}
+                      <span className="text-xs bg-secondary text-muted-foreground px-3 py-1.5 rounded-full font-medium">⏱ {service.duration_minutes} min</span>
                     </div>
                     <div className="mt-4">
                       <Link to="/book" className="text-sm font-semibold text-primary flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
