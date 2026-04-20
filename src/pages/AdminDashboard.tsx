@@ -3,15 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle, UserSquare, Briefcase } from "lucide-react";
+import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle, UserSquare, Briefcase, CalendarRange, CalendarOff, Star, Settings as SettingsIcon, DollarSign } from "lucide-react";
 import AdminAppointments from "@/components/admin/AdminAppointments";
 import AdminDoctors from "@/components/admin/AdminDoctors";
 import AdminPatients from "@/components/admin/AdminPatients";
 import AdminServices from "@/components/admin/AdminServices";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdminCalendar from "@/components/admin/AdminCalendar";
+import AdminHolidays from "@/components/admin/AdminHolidays";
+import AdminReviews from "@/components/admin/AdminReviews";
+import AdminSettings from "@/components/admin/AdminSettings";
+import AdminRevenue from "@/components/admin/AdminRevenue";
 import { cn } from "@/lib/utils";
 
-type View = "overview" | "appointments" | "patients" | "doctors" | "services";
+type View = "overview" | "appointments" | "calendar" | "patients" | "doctors" | "services" | "holidays" | "reviews" | "revenue" | "settings";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -80,9 +85,14 @@ const AdminDashboard = () => {
   const navItems: { key: View; label: string; icon: typeof LayoutDashboard }[] = [
     { key: "overview", label: "Overview", icon: LayoutDashboard },
     { key: "appointments", label: "Appointments", icon: CalendarDays },
+    { key: "calendar", label: "Calendar", icon: CalendarRange },
     { key: "patients", label: "Patients", icon: UserSquare },
     { key: "doctors", label: "Doctors", icon: Users },
     { key: "services", label: "Services", icon: Briefcase },
+    { key: "revenue", label: "Revenue", icon: DollarSign },
+    { key: "holidays", label: "Holidays", icon: CalendarOff },
+    { key: "reviews", label: "Reviews", icon: Star },
+    { key: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
   return (
@@ -267,6 +277,56 @@ const AdminDashboard = () => {
                 <p className="text-muted-foreground mt-1">Manage offerings, prices and durations. Used by the booking form and invoices.</p>
               </div>
               <AdminServices />
+            </div>
+          )}
+
+          {view === "calendar" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Calendar</h1>
+                <p className="text-muted-foreground mt-1">Visual month view of all appointments and closed days.</p>
+              </div>
+              <AdminCalendar />
+            </div>
+          )}
+
+          {view === "revenue" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Revenue</h1>
+                <p className="text-muted-foreground mt-1">Earnings summary based on current service prices.</p>
+              </div>
+              <AdminRevenue />
+            </div>
+          )}
+
+          {view === "holidays" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Holidays & Closed Days</h1>
+                <p className="text-muted-foreground mt-1">Block dates so patients can't book on those days.</p>
+              </div>
+              <AdminHolidays />
+            </div>
+          )}
+
+          {view === "reviews" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Reviews</h1>
+                <p className="text-muted-foreground mt-1">Approve patient reviews to publish them on the website.</p>
+              </div>
+              <AdminReviews />
+            </div>
+          )}
+
+          {view === "settings" && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-foreground">Settings</h1>
+                <p className="text-muted-foreground mt-1">Clinic profile and working hours.</p>
+              </div>
+              <AdminSettings />
             </div>
           )}
         </div>
