@@ -229,31 +229,49 @@ const AdminAppointments = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-serif text-xl">Appointments ({appointments.length})</CardTitle>
-        <div className="flex items-center gap-2">
+      <CardHeader className="space-y-4">
+        <div className="flex flex-row items-center justify-between gap-2">
+          <CardTitle className="font-serif text-xl">
+            Appointments <span className="text-muted-foreground font-normal text-base">({searchFiltered.length}{searchFiltered.length !== appointments.length ? ` of ${appointments.length}` : ""})</span>
+          </CardTitle>
+          <Button variant="outline" size="icon" onClick={fetchAppointments} title="Refresh">
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex flex-col md:flex-row md:items-center gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Search by name, phone, service or email..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full md:w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={fetchAppointments}>
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full md:w-[150px]" title="From date" />
+            <span className="text-muted-foreground text-sm">→</span>
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full md:w-[150px]" title="To date" />
+          </div>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="shrink-0">
+              <X className="w-3.5 h-3.5 mr-1" />Clear
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
           <p className="text-muted-foreground text-center py-8">Loading...</p>
-        ) : appointments.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No appointments found.</p>
+        ) : searchFiltered.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No appointments match your filters.</p>
         ) : (
           <div className="space-y-8">
             {groupedSorted.map(([label, group]) => (
