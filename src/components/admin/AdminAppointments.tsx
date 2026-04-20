@@ -182,13 +182,15 @@ const AdminAppointments = () => {
     doc.text("DETAIL", 56, startY + 21);
     doc.text("INFORMATION", 280, startY + 21);
 
+    const price = servicePrices[apt.service];
     const rows: [string, string][] = [
       ["Service", apt.service],
-      ["Doctor", apt.doctor],
       ["Date", apt.date],
       ["Time", apt.time_slot],
       ["Status", apt.status.toUpperCase()],
     ];
+    if (price !== undefined) rows.splice(1, 0, ["Price", `$${price.toFixed(2)}`]);
+
     doc.setTextColor(40, 40, 40);
     rows.forEach((r, i) => {
       const y = startY + 32 + i * 32;
@@ -201,6 +203,18 @@ const AdminAppointments = () => {
       doc.setFont("helvetica", "normal");
       doc.text(r[1], 280, y + 21);
     });
+
+    if (price !== undefined) {
+      const totalY = startY + 32 + rows.length * 32 + 16;
+      doc.setFillColor(13, 110, 120);
+      doc.roundedRect(40, totalY, pageW - 80, 44, 6, 6, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("TOTAL DUE", 56, totalY + 28);
+      doc.setFontSize(16);
+      doc.text(`$${price.toFixed(2)}`, pageW - 56, totalY + 28, { align: "right" });
+    }
 
     doc.setDrawColor(220, 220, 220);
     doc.line(40, 720, pageW - 40, 720);
