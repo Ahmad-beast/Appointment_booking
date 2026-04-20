@@ -149,7 +149,7 @@ const AdminDashboard = () => {
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
-          <div className="flex border-t border-primary-foreground/10">
+          <div className="flex border-t border-primary-foreground/10 overflow-x-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = view === item.key;
@@ -158,11 +158,11 @@ const AdminDashboard = () => {
                   key={item.key}
                   onClick={() => setView(item.key)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium border-b-2 transition-colors",
+                    "flex-1 min-w-[80px] flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium border-b-2 transition-colors",
                     active ? "border-accent text-accent" : "border-transparent text-primary-foreground/70"
                   )}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   {item.label}
                 </button>
               );
