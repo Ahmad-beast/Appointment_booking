@@ -48,7 +48,7 @@ const AdminAppointments = () => {
 
   const fetchAppointments = async () => {
     setLoading(true);
-    let query = supabase.from("appointments").select("*").order("date", { ascending: false });
+    let query = supabase.from("appointments").select("*").order("date", { ascending: true }).order("time_slot", { ascending: true });
     if (filter !== "all") query = query.eq("status", filter);
     const { data, error } = await query;
     if (error) toast({ title: "Error loading appointments", variant: "destructive" });
@@ -57,6 +57,23 @@ const AdminAppointments = () => {
   };
 
   useEffect(() => { fetchAppointments(); }, [filter]);
+
+  const copyPhone = async (phone: string) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      toast({ title: "Phone copied", description: phone });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+  const grouped = appointments.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
+    const { label, order } = groupLabel(apt.date);
+    if (!acc[label]) acc[label] = { order, items: [] };
+    acc[label].items.push(apt);
+    return acc;
+  }, {});
+  const groupedSorted = Object.entries(grouped).sort((a, b) => a[1].order - b[1].order);
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("appointments").update({ status }).eq("id", id);
