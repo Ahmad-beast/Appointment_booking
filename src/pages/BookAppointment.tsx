@@ -16,11 +16,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const services = [
-  "Teeth Cleaning", "Teeth Whitening", "Dental Implants",
-  "Braces & Orthodontics", "Root Canal Treatment", "Cosmetic Dentistry",
-  "Dental Crowns", "Emergency Dental Care",
-];
+type ServiceOption = { id: string; name: string; price: number; duration_minutes: number };
 
 const DEFAULT_DOCTOR = "Any Available Doctor";
 
