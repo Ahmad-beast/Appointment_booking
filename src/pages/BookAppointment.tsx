@@ -370,7 +370,7 @@ const BookAppointment = () => {
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={date} onSelect={handleDateSelect} disabled={(d) => d < new Date() || d.getDay() === 0 || holidayDates.has(format(d, "yyyy-MM-dd"))} initialFocus className="p-3 pointer-events-auto" />
+                            <Calendar mode="single" selected={date} onSelect={handleDateSelect} disabled={(d) => d < new Date() || d.getDay() === 0 || holidayMap.has(format(d, "yyyy-MM-dd"))} modifiers={{ holiday: (d) => holidayMap.has(format(d, "yyyy-MM-dd")) }} modifiersClassNames={{ holiday: "bg-destructive/15 text-destructive line-through" }} initialFocus className="p-3 pointer-events-auto" />
                           </PopoverContent>
                         </Popover>
                       </div>
