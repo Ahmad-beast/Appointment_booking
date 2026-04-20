@@ -1,24 +1,59 @@
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTASection from "@/components/CTASection";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-const reviews = [
-  { name: "Maria Johnson", treatment: "Teeth Whitening", rating: 5, review: "Absolutely amazing experience! My teeth have never looked this good. The staff was incredibly professional and made me feel comfortable throughout the entire process." },
-  { name: "Robert Smith", treatment: "Dental Implants", rating: 5, review: "Dr. Wilson did an incredible job with my implants. The process was smooth, painless, and the results are phenomenal. I can eat and smile with full confidence now." },
-  { name: "Lisa Anderson", treatment: "Orthodontics", rating: 5, review: "Best dental clinic I've ever been to. The entire team is so caring and attentive. My braces journey has been much easier than I expected." },
-  { name: "David Park", treatment: "Root Canal", rating: 4, review: "I was terrified of getting a root canal but the team at SmilePro made it completely painless. Modern equipment and very gentle doctors." },
-  { name: "Jennifer Lee", treatment: "Cosmetic Dentistry", rating: 5, review: "Got porcelain veneers done here and they look absolutely natural. Dr. Mitchell is a true artist. My smile has completely transformed!" },
-  { name: "Ahmed Hassan", treatment: "Teeth Cleaning", rating: 5, review: "Regular cleanings here are always thorough and comfortable. The hygienists are excellent and the facility is spotlessly clean." },
-  { name: "Sophie Williams", treatment: "Braces", rating: 4, review: "Great orthodontic treatment for my teenage daughter. Dr. Chen was patient and explained everything clearly. The progress has been remarkable." },
-  { name: "Carlos Martinez", treatment: "Emergency Care", rating: 5, review: "Had a dental emergency on a weekend and they saw me within an hour. Professional, quick, and caring. Truly exceptional emergency service." },
-  { name: "Priya Sharma", treatment: "Dental Crown", rating: 5, review: "Got a same-day crown and it fits perfectly. The CEREC technology is impressive. No temporary crown needed – walked out with a perfect tooth!" },
-  { name: "Tom Henderson", treatment: "Dental Implants", rating: 5, review: "After losing a tooth, I was devastated. Dr. Chen placed my implant with such precision. It looks and feels exactly like my natural tooth." },
-];
-
-const overallRating = (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1);
+type Review = { id: string; patient_name: string; rating: number; comment: string };
 
 const Reviews = () => {
+  const { toast } = useToast();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ patient_name: "", rating: 5, comment: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("id,patient_name,rating,comment")
+        .eq("approved", true)
+        .order("created_at", { ascending: false });
+      setReviews((data as Review[]) || []);
+    })();
+  }, []);
+
+  const overallRating = reviews.length
+    ? (reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)
+    : "5.0";
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.patient_name.trim() || !form.comment.trim()) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("reviews").insert({
+      patient_name: form.patient_name.trim(),
+      rating: form.rating,
+      comment: form.comment.trim(),
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: "Failed to submit", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Thank you!", description: "Your review will appear after approval." });
+      setForm({ patient_name: "", rating: 5, comment: "" });
+      setOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -36,37 +71,67 @@ const Reviews = () => {
                 <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
               ))}
             </div>
-            <p className="text-sm mt-2" style={{ color: 'hsl(210, 15%, 65%)' }}>Based on {reviews.length} reviews</p>
+            <p className="text-sm mt-2" style={{ color: 'hsl(210, 15%, 65%)' }}>Based on {reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
+          </div>
+
+          <div className="mt-8">
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="rounded-full bg-white text-primary hover:bg-white/90"><Send className="w-4 h-4 mr-2" />Share Your Experience</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Leave a review</DialogTitle></DialogHeader>
+                <form onSubmit={submit} className="space-y-4">
+                  <div><Label>Your Name *</Label><Input value={form.patient_name} onChange={(e) => setForm({ ...form, patient_name: e.target.value })} required /></div>
+                  <div>
+                    <Label>Rating *</Label>
+                    <div className="flex gap-1 mt-2">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <button key={n} type="button" onClick={() => setForm({ ...form, rating: n })}>
+                          <Star className={`w-7 h-7 ${n <= form.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div><Label>Your Review *</Label><Textarea rows={4} value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Tell us about your experience..." required /></div>
+                  <Button type="submit" className="w-full" disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
+                  <p className="text-xs text-muted-foreground text-center">Your review will be visible after admin approval.</p>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
 
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
-            {reviews.map((r, idx) => (
-              <div key={idx} className="bg-card rounded-2xl border border-border p-7 hover:shadow-md hover:border-primary/20 transition-all">
-                <Quote className="w-8 h-8 text-primary/20 mb-4" />
-                <p className="text-foreground/80 text-sm leading-relaxed mb-5">{r.review}</p>
-                <div className="flex items-center justify-between pt-5 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-primary font-bold text-sm">{r.name.split(" ").map(n => n[0]).join("")}</span>
+          {reviews.length === 0 ? (
+            <p className="text-center text-muted-foreground">No reviews yet. Be the first!</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
+              {reviews.map((r) => (
+                <div key={r.id} className="bg-card rounded-2xl border border-border p-7 hover:shadow-md hover:border-primary/20 transition-all">
+                  <Quote className="w-8 h-8 text-primary/20 mb-4" />
+                  <p className="text-foreground/80 text-sm leading-relaxed mb-5">{r.comment}</p>
+                  <div className="flex items-center justify-between pt-5 border-t border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-bold text-sm">{r.patient_name.split(" ").map((n) => n[0]).join("").slice(0, 2)}</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">{r.patient_name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">{r.name}</p>
-                      <p className="text-muted-foreground text-xs">{r.treatment}</p>
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
+                      ))}
                     </div>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? "text-amber-400 fill-amber-400" : "text-border"}`} />
-                    ))}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

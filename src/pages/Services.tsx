@@ -1,25 +1,29 @@
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTASection from "@/components/CTASection";
-import { Sparkles, Shield, Smile, Stethoscope, Zap, Heart, Crown, AlertTriangle, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { useScrollAnimation, useStaggerAnimation } from "@/hooks/useScrollAnimation";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
-const services = [
-  { icon: Zap, title: "Teeth Cleaning", desc: "Professional deep cleaning removes plaque, tartar, and stains to prevent cavities and gum disease.", price: "$80 - $150", benefits: ["Prevents cavities", "Freshens breath", "Removes stains"], gradient: "from-emerald-500/10 to-green-500/10" },
-  { icon: Sparkles, title: "Teeth Whitening", desc: "Advanced in-office whitening treatments can brighten your smile by up to 8 shades in just one visit.", price: "$200 - $500", benefits: ["Up to 8 shades whiter", "Quick results", "Long-lasting"], gradient: "from-amber-500/10 to-orange-500/10" },
-  { icon: Shield, title: "Dental Implants", desc: "Permanent titanium implants replace missing teeth with natural-looking, durable restorations.", price: "$1,500 - $3,000", benefits: ["Permanent solution", "Natural appearance", "Preserves bone"], gradient: "from-primary/10 to-cyan-500/10" },
-  { icon: Smile, title: "Braces & Orthodontics", desc: "From traditional metal braces to clear aligners, we offer comprehensive orthodontic solutions.", price: "$3,000 - $7,000", benefits: ["Straighter teeth", "Better bite", "Improved confidence"], gradient: "from-violet-500/10 to-purple-500/10" },
-  { icon: Stethoscope, title: "Root Canal Treatment", desc: "Pain-free root canal therapy using modern rotary instruments and advanced anesthesia.", price: "$500 - $1,200", benefits: ["Saves natural tooth", "Eliminates pain", "Prevents extraction"], gradient: "from-rose-500/10 to-pink-500/10" },
-  { icon: Heart, title: "Cosmetic Dentistry", desc: "Transform your smile with porcelain veneers, dental bonding, and smile makeovers.", price: "$300 - $2,000", benefits: ["Custom design", "Natural look", "Confidence boost"], gradient: "from-primary/10 to-teal-500/10" },
-  { icon: Crown, title: "Dental Crowns", desc: "High-quality porcelain and zirconia crowns restore damaged or weakened teeth.", price: "$800 - $1,500", benefits: ["Same-day available", "Durable material", "Perfect fit"], gradient: "from-indigo-500/10 to-blue-500/10" },
-  { icon: AlertTriangle, title: "Emergency Dental Care", desc: "Immediate care for dental emergencies including severe toothaches and broken teeth.", price: "$100 - $500", benefits: ["Same-day service", "Pain relief", "24/7 phone line"], gradient: "from-red-500/10 to-orange-500/10" },
-];
+type Service = { id: string; name: string; description: string | null; price: number; duration_minutes: number };
 
 const Services = () => {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: gridRef, isVisible: gridVisible } = useStaggerAnimation(8);
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("services")
+        .select("id,name,description,price,duration_minutes")
+        .eq("active", true)
+        .order("sort_order");
+      setServices((data as Service[]) || []);
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen page-enter">
