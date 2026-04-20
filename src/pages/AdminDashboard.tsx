@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { LogOut, CalendarDays, Users, LayoutDashboard, Stethoscope, Clock, CheckCircle2, XCircle, UserSquare, Briefcase } from "lucide-react";
 import AdminAppointments from "@/components/admin/AdminAppointments";
 import AdminDoctors from "@/components/admin/AdminDoctors";
+import AdminPatients from "@/components/admin/AdminPatients";
+import AdminServices from "@/components/admin/AdminServices";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { cn } from "@/lib/utils";
 
-type View = "overview" | "appointments" | "doctors";
+type View = "overview" | "appointments" | "patients" | "doctors" | "services";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
