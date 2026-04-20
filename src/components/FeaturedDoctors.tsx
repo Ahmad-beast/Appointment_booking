@@ -55,7 +55,9 @@ const FeaturedDoctors = () => {
                       src={doc.image_url}
                       alt={`${doc.name}, ${doc.specialization}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      loading="lazy"
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">

@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, FileDown, Send } from "lucide-react";
 import { format } from "date-fns";
+import { jsPDF } from "jspdf";
 
 type Appointment = {
   id: string;
@@ -68,6 +69,117 @@ const AdminAppointments = () => {
     }
   };
 
+  const generateInvoicePDF = (apt: Appointment): jsPDF => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const invoiceNo = `INV-${apt.id.slice(0, 8).toUpperCase()}`;
+    const issued = format(new Date(), "PPP");
+
+    doc.setFillColor(13, 110, 120);
+    doc.rect(0, 0, pageW, 110, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(26);
+    doc.text("SmilePro Dental", 40, 55);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("123 Smile Avenue, Suite 200", 40, 75);
+    doc.text("Phone: (123) 456-7890  -  hello@smilepro.com", 40, 90);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("APPOINTMENT", pageW - 40, 55, { align: "right" });
+    doc.text("CONFIRMATION", pageW - 40, 78, { align: "right" });
+
+    doc.setTextColor(30, 30, 30);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(`Invoice #: ${invoiceNo}`, 40, 150);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Issued: ${issued}`, 40, 168);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Billed To:", pageW - 240, 150);
+    doc.setFont("helvetica", "normal");
+    doc.text(apt.patient_name, pageW - 240, 168);
+    doc.text(apt.phone, pageW - 240, 184);
+    if (apt.email) doc.text(apt.email, pageW - 240, 200);
+
+    doc.setFillColor(232, 247, 248);
+    doc.roundedRect(40, 230, pageW - 80, 70, 8, 8, "F");
+    doc.setTextColor(13, 110, 120);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Your appointment has been booked!", 60, 258);
+    doc.setTextColor(60, 60, 60);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Please arrive 10 minutes before your scheduled time. Contact us if you need to reschedule.", 60, 280);
+
+    const startY = 340;
+    doc.setFillColor(248, 250, 251);
+    doc.rect(40, startY, pageW - 80, 32, "F");
+    doc.setTextColor(80, 80, 80);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("DETAIL", 56, startY + 21);
+    doc.text("INFORMATION", 280, startY + 21);
+
+    const rows: [string, string][] = [
+      ["Service", apt.service],
+      ["Doctor", apt.doctor],
+      ["Date", apt.date],
+      ["Time", apt.time_slot],
+      ["Status", apt.status.toUpperCase()],
+    ];
+    doc.setTextColor(40, 40, 40);
+    rows.forEach((r, i) => {
+      const y = startY + 32 + i * 32;
+      if (i % 2 === 0) {
+        doc.setFillColor(252, 253, 254);
+        doc.rect(40, y, pageW - 80, 32, "F");
+      }
+      doc.setFont("helvetica", "bold");
+      doc.text(r[0], 56, y + 21);
+      doc.setFont("helvetica", "normal");
+      doc.text(r[1], 280, y + 21);
+    });
+
+    doc.setDrawColor(220, 220, 220);
+    doc.line(40, 720, pageW - 40, 720);
+    doc.setTextColor(120, 120, 120);
+    doc.setFontSize(9);
+    doc.text("Thank you for choosing SmilePro Dental. We look forward to seeing you!", pageW / 2, 745, { align: "center" });
+    doc.text("This is a computer-generated confirmation and does not require a signature.", pageW / 2, 760, { align: "center" });
+
+    return doc;
+  };
+
+  const downloadInvoice = (apt: Appointment) => {
+    const doc = generateInvoicePDF(apt);
+    doc.save(`Invoice-${apt.patient_name.replace(/\s+/g, "_")}-${apt.date}.pdf`);
+    toast({ title: "Invoice downloaded" });
+  };
+
+  const sendInvoice = (apt: Appointment) => {
+    const doc = generateInvoicePDF(apt);
+    doc.save(`Invoice-${apt.patient_name.replace(/\s+/g, "_")}-${apt.date}.pdf`);
+    const subject = encodeURIComponent("Your SmilePro Dental Appointment Confirmation");
+    const body = encodeURIComponent(
+      `Hello ${apt.patient_name},\n\nYour appointment has been booked successfully.\n\n` +
+      `Service: ${apt.service}\nDoctor: ${apt.doctor}\nDate: ${apt.date}\nTime: ${apt.time_slot}\n\n` +
+      `Please find your confirmation invoice attached (downloaded to your device — please attach it to this email before sending).\n\n` +
+      `Thank you,\nSmilePro Dental`
+    );
+    if (apt.email) {
+      window.location.href = `mailto:${apt.email}?subject=${subject}&body=${body}`;
+    } else {
+      const phone = apt.phone.replace(/[^0-9]/g, "");
+      window.open(`https://wa.me/${phone}?text=${body}`, "_blank");
+    }
+    toast({ title: "Invoice ready", description: apt.email ? "Email draft opened — attach the downloaded PDF." : "WhatsApp opened — attach the downloaded PDF." });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -125,7 +237,7 @@ const AdminAppointments = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <Select onValueChange={(v) => updateStatus(apt.id, v)}>
                           <SelectTrigger className="w-[110px] h-8 text-xs">
                             <SelectValue placeholder="Update" />
@@ -136,6 +248,12 @@ const AdminAppointments = () => {
                             <SelectItem value="cancelled">Cancel</SelectItem>
                           </SelectContent>
                         </Select>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
+                          <FileDown className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-accent-foreground" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
+                          <Send className="w-4 h-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteAppointment(apt.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
