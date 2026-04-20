@@ -67,7 +67,7 @@ const BookAppointment = () => {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>(DEFAULT_SLOTS);
-  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
+  const [holidayMap, setHolidayMap] = useState<Map<string, string>>(new Map());
 
   const [form, setForm] = useState({
     patient_name: "", phone: "", email: "",
