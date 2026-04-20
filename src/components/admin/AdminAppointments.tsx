@@ -49,6 +49,16 @@ const AdminAppointments = () => {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("services").select("name,price");
+      const map: Record<string, number> = {};
+      (data || []).forEach((s: { name: string; price: number }) => { map[s.name] = Number(s.price); });
+      setServicePrices(map);
+    })();
+  }, []);
 
   const fetchAppointments = async () => {
     setLoading(true);
