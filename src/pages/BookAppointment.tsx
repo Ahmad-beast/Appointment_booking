@@ -67,7 +67,7 @@ const BookAppointment = () => {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>(DEFAULT_SLOTS);
-  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
+  const [holidayMap, setHolidayMap] = useState<Map<string, string>>(new Map());
 
   const [form, setForm] = useState({
     patient_name: "", phone: "", email: "",
@@ -80,13 +80,15 @@ const BookAppointment = () => {
       const [{ data: srv }, { data: settings }, { data: hols }] = await Promise.all([
         supabase.from("services").select("id,name,price,duration_minutes").eq("active", true).order("sort_order"),
         supabase.from("clinic_settings").select("opening_time,closing_time,slot_duration_minutes").maybeSingle(),
-        supabase.from("holidays").select("date").gte("date", format(new Date(), "yyyy-MM-dd")),
+        supabase.from("holidays").select("date,reason").gte("date", format(new Date(), "yyyy-MM-dd")).order("date"),
       ]);
       setServices((srv as ServiceOption[]) || []);
       if (settings) {
         setTimeSlots(generateSlots(settings.opening_time, settings.closing_time, settings.slot_duration_minutes));
       }
-      setHolidayDates(new Set((hols || []).map((h: { date: string }) => h.date)));
+      const m = new Map<string, string>();
+      (hols || []).forEach((h: { date: string; reason: string | null }) => m.set(h.date, h.reason || "Closed"));
+      setHolidayMap(m);
     })();
   }, []);
 
@@ -360,6 +362,17 @@ const BookAppointment = () => {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold">Preferred Date *</Label>
+                        {holidayMap.size > 0 && (
+                          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs space-y-1 mb-2">
+                            <div className="font-bold text-destructive uppercase tracking-wide text-[10px]">Upcoming Closed Days</div>
+                            {Array.from(holidayMap.entries()).slice(0, 5).map(([d, reason]) => (
+                              <div key={d} className="flex justify-between gap-3 text-foreground">
+                                <span className="font-semibold">{format(new Date(d + "T00:00:00"), "EEE, MMM d")}</span>
+                                <span className="text-muted-foreground truncate">{reason}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl h-11", !date && "text-muted-foreground")}>
@@ -368,7 +381,7 @@ const BookAppointment = () => {
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={date} onSelect={handleDateSelect} disabled={(d) => d < new Date() || d.getDay() === 0 || holidayDates.has(format(d, "yyyy-MM-dd"))} initialFocus className="p-3 pointer-events-auto" />
+                            <Calendar mode="single" selected={date} onSelect={handleDateSelect} disabled={(d) => d < new Date() || d.getDay() === 0 || holidayMap.has(format(d, "yyyy-MM-dd"))} modifiers={{ holiday: (d) => holidayMap.has(format(d, "yyyy-MM-dd")) }} modifiersClassNames={{ holiday: "bg-destructive/15 text-destructive line-through" }} initialFocus className="p-3 pointer-events-auto" />
                           </PopoverContent>
                         </Popover>
                       </div>
