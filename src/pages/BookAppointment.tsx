@@ -19,13 +19,34 @@ import { useToast } from "@/hooks/use-toast";
 type ServiceOption = { id: string; name: string; price: number; duration_minutes: number };
 
 const DEFAULT_DOCTOR = "Any Available Doctor";
-
-const timeSlots = [
+const DEFAULT_SLOTS = [
   "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
   "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM",
   "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM",
   "04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM",
 ];
+
+// Generate slots from opening/closing time and duration
+const generateSlots = (open: string, close: string, durationMin: number): string[] => {
+  try {
+    const [oh, om] = open.split(":").map(Number);
+    const [ch, cm] = close.split(":").map(Number);
+    const slots: string[] = [];
+    let cur = oh * 60 + om;
+    const end = ch * 60 + cm;
+    while (cur + durationMin <= end) {
+      const h = Math.floor(cur / 60);
+      const m = cur % 60;
+      const period = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      slots.push(`${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`);
+      cur += durationMin;
+    }
+    return slots;
+  } catch {
+    return DEFAULT_SLOTS;
+  }
+};
 
 const trustBadges = [
   { icon: Shield, label: "100% Secure", sub: "Your data is protected" },
@@ -45,6 +66,8 @@ const BookAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [services, setServices] = useState<ServiceOption[]>([]);
+  const [timeSlots, setTimeSlots] = useState<string[]>(DEFAULT_SLOTS);
+  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
 
   const [form, setForm] = useState({
     patient_name: "", phone: "", email: "",
@@ -54,12 +77,16 @@ const BookAppointment = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("services")
-        .select("id,name,price,duration_minutes")
-        .eq("active", true)
-        .order("sort_order");
-      setServices((data as ServiceOption[]) || []);
+      const [{ data: srv }, { data: settings }, { data: hols }] = await Promise.all([
+        supabase.from("services").select("id,name,price,duration_minutes").eq("active", true).order("sort_order"),
+        supabase.from("clinic_settings").select("opening_time,closing_time,slot_duration_minutes").maybeSingle(),
+        supabase.from("holidays").select("date").gte("date", format(new Date(), "yyyy-MM-dd")),
+      ]);
+      setServices((srv as ServiceOption[]) || []);
+      if (settings) {
+        setTimeSlots(generateSlots(settings.opening_time, settings.closing_time, settings.slot_duration_minutes));
+      }
+      setHolidayDates(new Set((hols || []).map((h: { date: string }) => h.date)));
     })();
   }, []);
 
