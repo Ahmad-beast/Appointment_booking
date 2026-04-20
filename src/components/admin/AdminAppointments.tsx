@@ -6,9 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, RefreshCw, FileDown, Send } from "lucide-react";
-import { format } from "date-fns";
+import { Trash2, RefreshCw, FileDown, Send, Copy, Phone, Calendar as CalIcon, Clock, User } from "lucide-react";
+import { format, isToday, isTomorrow, isYesterday, parseISO, isPast, isThisWeek } from "date-fns";
 import { jsPDF } from "jspdf";
+
+const groupLabel = (dateStr: string) => {
+  const d = parseISO(dateStr);
+  if (isToday(d)) return { label: "Today", order: 1 };
+  if (isTomorrow(d)) return { label: "Tomorrow", order: 0 };
+  if (isYesterday(d)) return { label: "Yesterday", order: 2 };
+  if (!isPast(d) && isThisWeek(d)) return { label: "This Week", order: 3 };
+  if (isPast(d)) return { label: "Past", order: 5 };
+  return { label: "Upcoming", order: 4 };
+};
 
 type Appointment = {
   id: string;
@@ -38,7 +48,7 @@ const AdminAppointments = () => {
 
   const fetchAppointments = async () => {
     setLoading(true);
-    let query = supabase.from("appointments").select("*").order("date", { ascending: false });
+    let query = supabase.from("appointments").select("*").order("date", { ascending: true }).order("time_slot", { ascending: true });
     if (filter !== "all") query = query.eq("status", filter);
     const { data, error } = await query;
     if (error) toast({ title: "Error loading appointments", variant: "destructive" });
@@ -47,6 +57,23 @@ const AdminAppointments = () => {
   };
 
   useEffect(() => { fetchAppointments(); }, [filter]);
+
+  const copyPhone = async (phone: string) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      toast({ title: "Phone copied", description: phone });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+  const grouped = appointments.reduce<Record<string, { order: number; items: Appointment[] }>>((acc, apt) => {
+    const { label, order } = groupLabel(apt.date);
+    if (!acc[label]) acc[label] = { order, items: [] };
+    acc[label].items.push(apt);
+    return acc;
+  }, {});
+  const groupedSorted = Object.entries(grouped).sort((a, b) => a[1].order - b[1].order);
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("appointments").update({ status }).eq("id", id);
@@ -208,61 +235,79 @@ const AdminAppointments = () => {
         ) : appointments.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No appointments found.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Patient</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.map((apt) => (
-                  <TableRow key={apt.id}>
-                    <TableCell className="font-medium">{apt.patient_name}</TableCell>
-                    <TableCell>{apt.phone}</TableCell>
-                    <TableCell>{apt.service}</TableCell>
-                    <TableCell>{apt.doctor}</TableCell>
-                    <TableCell>{apt.date}</TableCell>
-                    <TableCell>{apt.time_slot}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={statusColors[apt.status] || ""}>
-                        {apt.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <Select onValueChange={(v) => updateStatus(apt.id, v)}>
-                          <SelectTrigger className="w-[110px] h-8 text-xs">
-                            <SelectValue placeholder="Update" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirm</SelectItem>
-                            <SelectItem value="completed">Complete</SelectItem>
-                            <SelectItem value="cancelled">Cancel</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
-                          <FileDown className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-accent-foreground" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
-                          <Send className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteAppointment(apt.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="space-y-8">
+            {groupedSorted.map(([label, group]) => (
+              <div key={label}>
+                <div className="flex items-center gap-2 mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b">
+                  <CalIcon className="w-4 h-4 text-primary" />
+                  <h3 className="font-serif text-lg font-semibold text-foreground">{label}</h3>
+                  <Badge variant="secondary" className="ml-1">{group.items.length}</Badge>
+                </div>
+                <div className="overflow-x-auto rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead><User className="w-3.5 h-3.5 inline mr-1" />Patient</TableHead>
+                        <TableHead><Phone className="w-3.5 h-3.5 inline mr-1" />Phone</TableHead>
+                        <TableHead>Service</TableHead>
+                        <TableHead>Doctor</TableHead>
+                        <TableHead><CalIcon className="w-3.5 h-3.5 inline mr-1" />Date</TableHead>
+                        <TableHead><Clock className="w-3.5 h-3.5 inline mr-1" />Time</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {group.items.map((apt) => (
+                        <TableRow key={apt.id} className="hover:bg-muted/30">
+                          <TableCell className="font-medium">{apt.patient_name}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <a href={`tel:${apt.phone}`} className="hover:text-primary hover:underline transition-colors">{apt.phone}</a>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" title="Copy phone number" onClick={() => copyPhone(apt.phone)}>
+                                <Copy className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>{apt.service}</TableCell>
+                          <TableCell>{apt.doctor}</TableCell>
+                          <TableCell className="whitespace-nowrap">{format(parseISO(apt.date), "MMM d, yyyy")}</TableCell>
+                          <TableCell className="whitespace-nowrap">{apt.time_slot}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={statusColors[apt.status] || ""}>
+                              {apt.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 flex-wrap justify-end">
+                              <Select onValueChange={(v) => updateStatus(apt.id, v)}>
+                                <SelectTrigger className="w-[110px] h-8 text-xs">
+                                  <SelectValue placeholder="Update" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="confirmed">Confirm</SelectItem>
+                                  <SelectItem value="completed">Complete</SelectItem>
+                                  <SelectItem value="cancelled">Cancel</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
+                                <FileDown className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
+                                <Send className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete appointment" onClick={() => deleteAppointment(apt.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
