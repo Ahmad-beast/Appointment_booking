@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, FileDown, Send } from "lucide-react";
 import { format } from "date-fns";
+import { jsPDF } from "jspdf";
 
 type Appointment = {
   id: string;
@@ -125,7 +126,7 @@ const AdminAppointments = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <Select onValueChange={(v) => updateStatus(apt.id, v)}>
                           <SelectTrigger className="w-[110px] h-8 text-xs">
                             <SelectValue placeholder="Update" />
@@ -136,6 +137,12 @@ const AdminAppointments = () => {
                             <SelectItem value="cancelled">Cancel</SelectItem>
                           </SelectContent>
                         </Select>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
+                          <FileDown className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-accent-foreground" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
+                          <Send className="w-4 h-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteAppointment(apt.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
