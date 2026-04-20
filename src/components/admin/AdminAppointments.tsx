@@ -235,61 +235,79 @@ const AdminAppointments = () => {
         ) : appointments.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No appointments found.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Patient</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.map((apt) => (
-                  <TableRow key={apt.id}>
-                    <TableCell className="font-medium">{apt.patient_name}</TableCell>
-                    <TableCell>{apt.phone}</TableCell>
-                    <TableCell>{apt.service}</TableCell>
-                    <TableCell>{apt.doctor}</TableCell>
-                    <TableCell>{apt.date}</TableCell>
-                    <TableCell>{apt.time_slot}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={statusColors[apt.status] || ""}>
-                        {apt.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <Select onValueChange={(v) => updateStatus(apt.id, v)}>
-                          <SelectTrigger className="w-[110px] h-8 text-xs">
-                            <SelectValue placeholder="Update" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirm</SelectItem>
-                            <SelectItem value="completed">Complete</SelectItem>
-                            <SelectItem value="cancelled">Cancel</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
-                          <FileDown className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-accent-foreground" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
-                          <Send className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteAppointment(apt.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="space-y-8">
+            {groupedSorted.map(([label, group]) => (
+              <div key={label}>
+                <div className="flex items-center gap-2 mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b">
+                  <CalIcon className="w-4 h-4 text-primary" />
+                  <h3 className="font-serif text-lg font-semibold text-foreground">{label}</h3>
+                  <Badge variant="secondary" className="ml-1">{group.items.length}</Badge>
+                </div>
+                <div className="overflow-x-auto rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead><User className="w-3.5 h-3.5 inline mr-1" />Patient</TableHead>
+                        <TableHead><Phone className="w-3.5 h-3.5 inline mr-1" />Phone</TableHead>
+                        <TableHead>Service</TableHead>
+                        <TableHead>Doctor</TableHead>
+                        <TableHead><CalIcon className="w-3.5 h-3.5 inline mr-1" />Date</TableHead>
+                        <TableHead><Clock className="w-3.5 h-3.5 inline mr-1" />Time</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {group.items.map((apt) => (
+                        <TableRow key={apt.id} className="hover:bg-muted/30">
+                          <TableCell className="font-medium">{apt.patient_name}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <a href={`tel:${apt.phone}`} className="hover:text-primary hover:underline transition-colors">{apt.phone}</a>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" title="Copy phone number" onClick={() => copyPhone(apt.phone)}>
+                                <Copy className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>{apt.service}</TableCell>
+                          <TableCell>{apt.doctor}</TableCell>
+                          <TableCell className="whitespace-nowrap">{format(parseISO(apt.date), "MMM d, yyyy")}</TableCell>
+                          <TableCell className="whitespace-nowrap">{apt.time_slot}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={statusColors[apt.status] || ""}>
+                              {apt.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 flex-wrap justify-end">
+                              <Select onValueChange={(v) => updateStatus(apt.id, v)}>
+                                <SelectTrigger className="w-[110px] h-8 text-xs">
+                                  <SelectValue placeholder="Update" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="confirmed">Confirm</SelectItem>
+                                  <SelectItem value="completed">Complete</SelectItem>
+                                  <SelectItem value="cancelled">Cancel</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Download Invoice PDF" onClick={() => downloadInvoice(apt)}>
+                                <FileDown className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" title="Send invoice to patient" onClick={() => sendInvoice(apt)}>
+                                <Send className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Delete appointment" onClick={() => deleteAppointment(apt.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
