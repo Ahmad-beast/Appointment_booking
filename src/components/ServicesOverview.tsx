@@ -4,12 +4,12 @@ import { ArrowRight, Sparkles, Shield, Smile, Stethoscope, Zap, Heart } from "lu
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const services = [
-  { icon: Sparkles, title: "Teeth Whitening", desc: "Brighten your smile up to 8 shades in just one visit.", price: "From $299" },
-  { icon: Shield, title: "Dental Implants", desc: "Permanent, natural-looking tooth replacement solutions.", price: "From $1,800" },
-  { icon: Smile, title: "Invisalign & Braces", desc: "Modern orthodontics for perfectly aligned teeth.", price: "From $3,500" },
-  { icon: Stethoscope, title: "Root Canal", desc: "Pain-free treatment to save your natural teeth.", price: "From $650" },
-  { icon: Zap, title: "Cleaning & Checkup", desc: "Gentle deep cleaning for optimal oral health.", price: "From $120" },
-  { icon: Heart, title: "Cosmetic Dentistry", desc: "Veneers, bonding, and complete smile makeovers.", price: "From $850" },
+  { icon: Sparkles, title: "Teeth Whitening", desc: "Brighten your smile up to 8 shades in just one visit." },
+  { icon: Shield, title: "Dental Implants", desc: "Permanent, natural-looking tooth replacement solutions." },
+  { icon: Smile, title: "Invisalign & Braces", desc: "Modern orthodontics for perfectly aligned teeth." },
+  { icon: Stethoscope, title: "Root Canal", desc: "Pain-free treatment to save your natural teeth." },
+  { icon: Zap, title: "Cleaning & Checkup", desc: "Gentle deep cleaning for optimal oral health." },
+  { icon: Heart, title: "Cosmetic Dentistry", desc: "Veneers, bonding, and complete smile makeovers." },
 ];
 
 const ServicesOverview = () => {
@@ -56,7 +56,9 @@ const ServicesOverview = () => {
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">{service.desc}</p>
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
-                  <span className="text-sm font-bold text-primary">{service.price}</span>
+                  <Link to="/book" className="text-sm font-bold text-primary hover:underline">
+                    Book Now
+                  </Link>
                   <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
                 </div>
               </div>

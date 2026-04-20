@@ -346,7 +346,7 @@ const BookAppointment = () => {
                         <Label className="text-sm font-semibold">Service *</Label>
                         <Select value={form.service} onValueChange={(v) => setForm({ ...form, service: v })}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select service" /></SelectTrigger>
-                          <SelectContent>{services.map((s) => (<SelectItem key={s.id} value={s.name}>{s.name} <span className="text-muted-foreground text-xs ml-2">${Number(s.price).toFixed(0)} · {s.duration_minutes}m</span></SelectItem>))}</SelectContent>
+                          <SelectContent>{services.map((s) => (<SelectItem key={s.id} value={s.name}>{s.name} <span className="text-muted-foreground text-xs ml-2">{s.duration_minutes}m</span></SelectItem>))}</SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground pt-1">Our team will assign the best available specialist for you.</p>
                       </div>

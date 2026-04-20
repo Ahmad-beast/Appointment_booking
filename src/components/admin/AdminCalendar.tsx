@@ -89,6 +89,7 @@ const AdminCalendar = () => {
               <button
                 key={k}
                 onClick={() => setSelected(d)}
+                title={holiday ? `Closed: ${holiday.reason || "Holiday"}` : apts.length > 0 ? `${apts.length} appointment${apts.length !== 1 ? "s" : ""}` : undefined}
                 className={cn(
                   "aspect-square p-1.5 rounded-lg border text-left transition-all flex flex-col",
                   inMonth ? "bg-background" : "bg-muted/30",
