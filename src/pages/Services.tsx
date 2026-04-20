@@ -67,15 +67,14 @@ const Services = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h3 className="font-serif text-xl text-foreground group-hover:text-primary transition-colors duration-300">{service.name}</h3>
-                      <span className="text-primary font-bold text-sm whitespace-nowrap bg-primary/10 px-4 py-1.5 rounded-full">${Number(service.price).toFixed(0)}</span>
                     </div>
                     {service.description && <p className="text-muted-foreground text-sm leading-relaxed mb-4">{service.description}</p>}
                     <div className="flex flex-wrap gap-2">
                       <span className="text-xs bg-secondary text-muted-foreground px-3 py-1.5 rounded-full font-medium">⏱ {service.duration_minutes} min</span>
                     </div>
                     <div className="mt-4">
-                      <Link to="/book" className="text-sm font-semibold text-primary flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                        Book This Service <ArrowRight className="w-3.5 h-3.5" />
+                      <Link to="/book" className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 hover:-translate-y-0.5 shadow-md shadow-primary/30 transition-all duration-300">
+                        Book Now <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
                   </div>

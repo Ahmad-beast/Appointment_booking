@@ -77,8 +77,8 @@ const Navbar = () => {
               <span className="hidden xl:inline">(123) 456-7890</span>
             </a>
             <Link to="/book">
-              <Button className="rounded-full h-10 px-5 font-semibold gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
-                <Calendar className="w-4 h-4" /> Book Now
+              <Button className="rounded-full h-12 px-7 text-base font-bold gap-2 shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+                <Calendar className="w-5 h-5" /> Book Now
               </Button>
             </Link>
           </div>
@@ -114,13 +114,13 @@ const Navbar = () => {
             ))}
             <div className="pt-3 grid grid-cols-2 gap-2">
               <a href="tel:+1234567890">
-                <Button variant="outline" className="w-full rounded-xl gap-2 font-semibold">
-                  <Phone className="w-4 h-4" /> Call
+                <Button variant="outline" className="w-full h-12 rounded-xl gap-2 text-base font-bold">
+                  <Phone className="w-5 h-5" /> Call
                 </Button>
               </a>
               <Link to="/book">
-                <Button className="w-full rounded-xl gap-2 font-semibold shadow-md shadow-primary/25">
-                  <Calendar className="w-4 h-4" /> Book
+                <Button className="w-full h-12 rounded-xl gap-2 text-base font-bold shadow-md shadow-primary/25">
+                  <Calendar className="w-5 h-5" /> Book
                 </Button>
               </Link>
             </div>

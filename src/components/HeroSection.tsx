@@ -46,14 +46,14 @@ const HeroSection = () => {
               Gentle, modern dentistry for the whole family. From routine checkups to complete smile transformations — experience care that puts you first.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link to="/book" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-base gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
-                  <Calendar className="w-4 h-4" /> Book Free Consultation
+                <Button size="lg" className="w-full sm:w-auto h-14 px-10 rounded-full font-bold text-base sm:text-lg gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+                  <Calendar className="w-5 h-5" /> Book Free Consultation
                 </Button>
               </Link>
               <a href="tel:+1234567890" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-13 px-8 rounded-full font-semibold text-base border-2 hover:bg-primary/5 hover:border-primary transition-all duration-300">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-full font-bold text-base sm:text-lg border-2 hover:bg-primary/5 hover:border-primary transition-all duration-300">
                   Call (123) 456-7890
                 </Button>
               </a>

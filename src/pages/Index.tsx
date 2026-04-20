@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import ClosedTodayBanner from "@/components/ClosedTodayBanner";
 import HeroSection from "@/components/HeroSection";
 import ServicesOverview from "@/components/ServicesOverview";
 import WhyChooseUs from "@/components/WhyChooseUs";
@@ -11,6 +12,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <ClosedTodayBanner />
       <HeroSection />
       <ServicesOverview />
       <WhyChooseUs />
