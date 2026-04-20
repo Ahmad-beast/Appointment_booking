@@ -80,7 +80,9 @@ const AdminDashboard = () => {
   const navItems: { key: View; label: string; icon: typeof LayoutDashboard }[] = [
     { key: "overview", label: "Overview", icon: LayoutDashboard },
     { key: "appointments", label: "Appointments", icon: CalendarDays },
+    { key: "patients", label: "Patients", icon: UserSquare },
     { key: "doctors", label: "Doctors", icon: Users },
+    { key: "services", label: "Services", icon: Briefcase },
   ];
 
   return (
