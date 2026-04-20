@@ -89,7 +89,7 @@ const Doctors = () => {
                       <div className="absolute top-4 right-4 w-20 h-20 rounded-full border border-white/10 group-hover:scale-150 transition-transform duration-700" />
                       <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full border border-white/10 group-hover:scale-150 transition-transform duration-700 delay-100" />
                       {doc.image_url ? (
-                        <img src={doc.image_url} alt={doc.name} className="w-28 h-28 rounded-full object-cover border-2 border-white/30 shadow-lg group-hover:scale-110 transition-transform duration-500" />
+                        <img src={doc.image_url} alt={doc.name} loading="eager" decoding="async" fetchPriority="high" className="w-28 h-28 rounded-full object-cover border-2 border-white/30 shadow-lg group-hover:scale-110 transition-transform duration-500" />
                       ) : (
                         <div className="w-28 h-28 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg">
                           <span className="font-sans text-3xl font-bold text-primary">{getInitials(doc.name)}</span>
