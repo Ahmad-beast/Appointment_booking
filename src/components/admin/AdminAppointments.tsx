@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, RefreshCw, FileDown, Send, Copy, Phone, Calendar as CalIcon, Clock, User, Search, X } from "lucide-react";
 import { format, isToday, isTomorrow, isYesterday, parseISO, isPast, isThisWeek } from "date-fns";
 import { jsPDF } from "jspdf";
+import { exportToCSV } from "@/lib/csvExport";
 
 const groupLabel = (dateStr: string) => {
   const d = parseISO(dateStr);
@@ -258,9 +259,21 @@ const AdminAppointments = () => {
           <CardTitle className="font-serif text-xl">
             Appointments <span className="text-muted-foreground font-normal text-base">({searchFiltered.length}{searchFiltered.length !== appointments.length ? ` of ${appointments.length}` : ""})</span>
           </CardTitle>
-          <Button variant="outline" size="icon" onClick={fetchAppointments} title="Refresh">
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => {
+              const rows = searchFiltered.map((a) => ({
+                Date: a.date, Time: a.time_slot, Patient: a.patient_name,
+                Phone: a.phone, Email: a.email || "", Service: a.service,
+                Price: servicePrices[a.service] || 0, Status: a.status,
+              }));
+              exportToCSV(`appointments-${format(new Date(), "yyyy-MM-dd")}.csv`, rows);
+            }} title="Export CSV">
+              <FileDown className="w-4 h-4 mr-1" /> Export
+            </Button>
+            <Button variant="outline" size="icon" onClick={fetchAppointments} title="Refresh">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row md:items-center gap-2">
           <div className="relative flex-1 min-w-0">
