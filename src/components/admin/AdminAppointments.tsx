@@ -332,7 +332,7 @@ const AdminAppointments = () => {
                             </div>
                           </TableCell>
                           <TableCell>{apt.service}</TableCell>
-                          <TableCell>{apt.doctor}</TableCell>
+                          <TableCell className="whitespace-nowrap font-medium">{servicePrices[apt.service] !== undefined ? `$${servicePrices[apt.service].toFixed(0)}` : "—"}</TableCell>
                           <TableCell className="whitespace-nowrap">{format(parseISO(apt.date), "MMM d, yyyy")}</TableCell>
                           <TableCell className="whitespace-nowrap">{apt.time_slot}</TableCell>
                           <TableCell>
