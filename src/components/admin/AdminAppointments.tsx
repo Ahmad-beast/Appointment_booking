@@ -312,7 +312,7 @@ const AdminAppointments = () => {
                         <TableHead><User className="w-3.5 h-3.5 inline mr-1" />Patient</TableHead>
                         <TableHead><Phone className="w-3.5 h-3.5 inline mr-1" />Phone</TableHead>
                         <TableHead>Service</TableHead>
-                        <TableHead>Doctor</TableHead>
+                        <TableHead>Price</TableHead>
                         <TableHead><CalIcon className="w-3.5 h-3.5 inline mr-1" />Date</TableHead>
                         <TableHead><Clock className="w-3.5 h-3.5 inline mr-1" />Time</TableHead>
                         <TableHead>Status</TableHead>
