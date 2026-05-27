@@ -275,6 +275,3 @@ The project is also compatible with Vercel, Netlify, or any static hosting that 
 
 ---
 
-## License
-
-This project was built with ❤️ on [Lovable](https://lovable.dev). Feel free to customize and deploy for your own clinic.
